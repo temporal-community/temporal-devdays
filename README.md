@@ -38,6 +38,10 @@ A failing check at the start is expected. It tells you which TODO is next.
 | 06 | [Schedules](concepts/06-schedules.md) | [exercise](python/06_schedules/exercise) · [solution](python/06_schedules/solution) | [exercise](java/06_schedules/exercise) · [solution](java/06_schedules/solution) |
 | 07 | [Standalone Activities](concepts/07-standalone-activities.md) | [exercise](python/07_standalone_activities/exercise) · [solution](python/07_standalone_activities/solution) | [exercise](java/07_standalone_activities/exercise) · [solution](java/07_standalone_activities/solution) |
 | 08 | [Testing](concepts/08-testing.md) | [exercise](python/08_testing/exercise) · [solution](python/08_testing/solution) | [exercise](java/08_testing/exercise) · [solution](java/08_testing/solution) |
+| 09 | [Activity design](concepts/09-activity-design.md) | [exercise](python/09_activity_design/exercise) · [solution](python/09_activity_design/solution) | [exercise](java/09_activity_design/exercise) · [solution](java/09_activity_design/solution) |
+| 10 | [Saga across services](concepts/10-saga-across-services.md) | [exercise](python/10_saga_across_services/exercise) · [solution](python/10_saga_across_services/solution) | [exercise](java/10_saga_across_services/exercise) · [solution](java/10_saga_across_services/solution) |
+| 11 | [Start or attach](concepts/11-start-or-attach.md) | [exercise](python/11_start_or_attach/exercise) · [solution](python/11_start_or_attach/solution) | [exercise](java/11_start_or_attach/exercise) · [solution](java/11_start_or_attach/solution) |
+| 12 | [Human in the loop](concepts/12-human-in-the-loop.md) | [exercise](python/12_human_in_the_loop/exercise) · [solution](python/12_human_in_the_loop/solution) | [exercise](java/12_human_in_the_loop/exercise) · [solution](java/12_human_in_the_loop/solution) |
 
 ## Troubleshooting
 - Port 7233 in use: another dev server is running. Stop it, or use it.
