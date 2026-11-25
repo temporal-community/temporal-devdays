@@ -72,7 +72,7 @@ def live() -> None:
         d = ROOT / item["dir"]
         started = []
         for cmd in item.get("before", []):
-            subprocess.run(shlex.split(cmd), capture_output=True)
+            subprocess.run(shlex.split(cmd), capture_output=True, cwd=d)
         try:
             for cmd in item["workers"]:
                 started.append(subprocess.Popen(shlex.split(cmd), cwd=d, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL))

@@ -50,6 +50,12 @@ def convert(text: str, lang: str) -> str:
             j += 1
         if j == len(lines):
             sys.exit(f"missing '{end}'")
+        broken = [re.sub(rf"^(\s*){re.escape(comment)}\? ?", r"\1", l)
+                  for l in lines[i + 1:j] if re.match(rf"^\s*{re.escape(comment)}\?", l)]
+        if broken:
+            out += [lines[i], *broken, lines[j]]
+            i = j + 1
+            continue
         rest = next((l.strip() for l in lines[j + 1:] if l.strip()), "")
         tail = rest.startswith("}") or lang == "py"
         out += [lines[i], stub(indent, lang, bool(wf), n, hint, tail), lines[j]]

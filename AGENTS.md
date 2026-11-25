@@ -25,6 +25,7 @@ A learn-and-practice resource for Temporal. Each concept has a plain-words expla
 - Beginner level. Short code that fits on a screen. Minimal comments.
 - Every exercise folder is self-contained: no shared package, no imports from another folder.
 - An exercise has `TODO N start` / `TODO N end` markers. Unfinished code fails with a message that names the TODO: `NotImplementedError` / `UnsupportedOperationException` in normal code, and a non-retryable `ApplicationError` / `ApplicationFailure` inside a Workflow (a plain exception there would retry forever). Write the solution with `TODO N start` / `TODO N end` markers and generate the exercise with `python3 scripts/make_exercise.py <solution folder>`.
+- For an anti-pattern exercise, put the broken version in the solution as `#? ` (Python) or `//? ` (Java) lines inside the TODO block. The generator puts that broken code in the exercise, and the test message names the TODO.
 - Every TODO number is listed in the exercise README checklist.
 - The solution has the same files, all TODOs done, tests passing.
 - A recorded `history.json` contains your host name in every `identity` field. Replace it with `1@devdays` before you commit (`sed -E 's/[0-9]+@[^"]+/1@devdays/'`); the checker rejects host names.

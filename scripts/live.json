@@ -156,5 +156,34 @@
     "expect": "sent 'Welcome!' to user-123",
     "wait": 20,
     "cleanup": []
+  },
+  {
+    "dir": "python/10_saga_across_services/solution",
+    "workers": [
+      "../../.venv/bin/python worker.py orchestrator",
+      "../../.venv/bin/python worker.py accounts",
+      "../../.venv/bin/python worker.py fraud",
+      "../../.venv/bin/python worker.py notifications"
+    ],
+    "starter": "../../.venv/bin/python starter.py",
+    "expect": "Transfer completed",
+    "wait": 8,
+    "cleanup": []
+  },
+  {
+    "dir": "java/10_saga_across_services/solution",
+    "workers": [
+      "mvn -q exec:java@worker",
+      "mvn -q exec:java@worker -Dworker.main=devdays.AccountsWorker",
+      "mvn -q exec:java@worker -Dworker.main=devdays.FraudWorker",
+      "mvn -q exec:java@worker -Dworker.main=devdays.NotifyWorker"
+    ],
+    "starter": "mvn -q exec:java@starter",
+    "expect": "Transfer completed",
+    "wait": 25,
+    "before": [
+      "mvn -q compile"
+    ],
+    "cleanup": []
   }
 ]
