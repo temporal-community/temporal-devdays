@@ -42,6 +42,10 @@ A failing check at the start is expected. It tells you which TODO is next.
 | 10 | [Saga across services](concepts/10-saga-across-services.md) | [exercise](python/10_saga_across_services/exercise) · [solution](python/10_saga_across_services/solution) | [exercise](java/10_saga_across_services/exercise) · [solution](java/10_saga_across_services/solution) |
 | 11 | [Start or attach](concepts/11-start-or-attach.md) | [exercise](python/11_start_or_attach/exercise) · [solution](python/11_start_or_attach/solution) | [exercise](java/11_start_or_attach/exercise) · [solution](java/11_start_or_attach/solution) |
 | 12 | [Human in the loop](concepts/12-human-in-the-loop.md) | [exercise](python/12_human_in_the_loop/exercise) · [solution](python/12_human_in_the_loop/solution) | [exercise](java/12_human_in_the_loop/exercise) · [solution](java/12_human_in_the_loop/solution) |
+| 13 | [Fan-out, fan-in and child Workflows](concepts/13-fan-out-fan-in.md) | [exercise](python/13_fan_out_fan_in/exercise) · [solution](python/13_fan_out_fan_in/solution) | [exercise](java/13_fan_out_fan_in/exercise) · [solution](java/13_fan_out_fan_in/solution) |
+| 14 | [Entity Workflow and Continue-As-New](concepts/14-entity-continue-as-new.md) | [exercise](python/14_entity_continue_as_new/exercise) · [solution](python/14_entity_continue_as_new/solution) | [exercise](java/14_entity_continue_as_new/exercise) · [solution](java/14_entity_continue_as_new/solution) |
+| 15 | [Safe deploys](concepts/15-safe-deploys.md) | [exercise](python/15_safe_deploys/exercise) · [solution](python/15_safe_deploys/solution) | [exercise](java/15_safe_deploys/exercise) · [solution](java/15_safe_deploys/solution) |
+| 16 | [An AI agent loop](concepts/16-ai-agent-loop.md) | [exercise](python/16_ai_agent_loop/exercise) · [solution](python/16_ai_agent_loop/solution) | [exercise](java/16_ai_agent_loop/exercise) · [solution](java/16_ai_agent_loop/solution) |
 
 ## Troubleshooting
 - Port 7233 in use: another dev server is running. Stop it, or use it.
