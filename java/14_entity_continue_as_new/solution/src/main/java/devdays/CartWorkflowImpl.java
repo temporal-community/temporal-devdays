@@ -1,0 +1,38 @@
+package devdays;
+
+import io.temporal.workflow.Workflow;
+import java.util.ArrayList;
+import java.util.List;
+
+public class CartWorkflowImpl implements CartWorkflow {
+    private final List<String> items = new ArrayList<>();
+    private int runs = 1;
+    private int added = 0;
+    private boolean closed = false;
+
+    @Override
+    public CartState run(CartState state, int maxPerRun) {
+        items.addAll(state.items());
+        runs = state.runs();
+        Workflow.await(() -> added >= maxPerRun || closed);
+        if (closed) {
+            return new CartState(items, runs);
+        }
+        // TODO 1 start [workflow]: continue as new with the items so far and runs + 1, so the history stays small
+        Workflow.continueAsNew(new CartState(new ArrayList<>(items), runs + 1), maxPerRun);
+        //? Workflow.await(() -> closed);
+        // TODO 1 end
+        return new CartState(items, runs);
+    }
+
+    @Override
+    public void addItem(String item) {
+        items.add(item);
+        added++;
+    }
+
+    @Override
+    public void close() {
+        closed = true;
+    }
+}
