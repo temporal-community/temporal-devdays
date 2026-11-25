@@ -27,6 +27,11 @@ def run(lang: str, d: Path) -> tuple[int, str]:
     return p.returncode, p.stdout + p.stderr
 
 
+def last_line(out: str) -> str:
+    lines = [l.strip() for l in out.splitlines() if l.strip()]
+    return " | ".join(lines[-2:])[:200]
+
+
 def record(name: str, ok: bool, note: str = "") -> None:
     rows.append((name, "ok" if ok else "FAIL", note))
 
@@ -45,8 +50,8 @@ def ignore(_dir, names):
 def behaviour() -> None:
     for lang in LANGS:
         for topic, ex, so in pairs(lang):
-            code, _ = run(lang, so)
-            record(f"{lang}/{topic}: solution passes", code == 0)
+            code, out = run(lang, so)
+            record(f"{lang}/{topic}: solution passes", code == 0, "" if code == 0 else last_line(out))
             code, out = run(lang, ex)
             broken = any(w in out for w in ("SyntaxError", "COMPILATION ERROR", "ImportError", "ModuleNotFoundError"))
             failed_on_todo = code != 0 and "TODO" in out and not broken
@@ -62,8 +67,8 @@ def behaviour() -> None:
                     if dest.exists():
                         shutil.rmtree(dest) if dest.is_dir() else dest.unlink()
                     shutil.copytree(item, dest, ignore=ignore) if item.is_dir() else shutil.copy2(item, dest)
-                code, _ = run(lang, work)
-            record(f"{lang}/{topic}: overlay passes", code == 0)
+                code, out = run(lang, work)
+            record(f"{lang}/{topic}: overlay passes", code == 0, "" if code == 0 else last_line(out))
 
 
 def live() -> None:

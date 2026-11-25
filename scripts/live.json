@@ -185,5 +185,25 @@
       "mvn -q compile"
     ],
     "cleanup": []
+  },
+  {
+    "dir": "python/16_ai_agent_loop/solution",
+    "workers": [
+      "../../.venv/bin/python worker.py"
+    ],
+    "starter": "../../.venv/bin/python starter.py",
+    "expect": "It is sunny in Pune",
+    "wait": 5,
+    "cleanup": []
+  },
+  {
+    "dir": "java/16_ai_agent_loop/solution",
+    "workers": [
+      "mvn -q compile exec:java@worker"
+    ],
+    "starter": "mvn -q exec:java@starter",
+    "expect": "It is sunny in Pune",
+    "wait": 20,
+    "cleanup": []
   }
 ]
