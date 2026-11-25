@@ -12,7 +12,7 @@ A learn-and-practice resource for Temporal. Each concept has a plain-words expla
 | Run every check (no server needed) | `make check` |
 | Run checks plus live smoke tests | `make check-live` (needs `temporal server start-dev`) |
 | Dev server and Web UI | `temporal server start-dev` then http://localhost:8233 |
-| Python exercise | `cd python/exercise_NN_x && uv run --project .. pytest` |
+| Python exercise | `cd python/exercise_NN_x && uv run pytest` |
 | Java exercise | `cd java/exercise_NN_x && mvn test` |
 
 ## Repo map
@@ -24,7 +24,7 @@ A learn-and-practice resource for Temporal. Each concept has a plain-words expla
 ## Exercise rules
 - Beginner level. Short code that fits on a screen. Minimal comments.
 - Every exercise folder is self-contained: no shared package, no imports from another folder.
-- An exercise has `TODO N start` / `TODO N end` markers. Unfinished code raises `NotImplementedError("TODO N: ...")` (Python) or `UnsupportedOperationException("TODO N: ...")` (Java), so a failing check names the TODO.
+- An exercise has `TODO N start` / `TODO N end` markers. Unfinished code fails with a message that names the TODO: `NotImplementedError` / `UnsupportedOperationException` in normal code, and a non-retryable `ApplicationError` / `ApplicationFailure` inside a Workflow (a plain exception there would retry forever). Write the solution with `TODO N start` / `TODO N end` markers and generate the exercise with `python3 scripts/make_exercise.py <solution folder>`.
 - Every TODO number is listed in the exercise README checklist.
 - The solution has the same files, all TODOs done, tests passing.
 - Never edit a `solution_*` folder when you only mean to change an `exercise_*`, and the reverse.

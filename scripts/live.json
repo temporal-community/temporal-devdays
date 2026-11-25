@@ -1,1 +1,90 @@
-[]
+[
+  {
+    "dir": "python/solution_01_hello",
+    "workers": [
+      "../.venv/bin/python worker.py"
+    ],
+    "starter": "../.venv/bin/python starter.py",
+    "expect": "Hello, Temporal!",
+    "wait": 5,
+    "cleanup": []
+  },
+  {
+    "dir": "python/solution_02_durable_execution",
+    "workers": [
+      "../.venv/bin/python worker.py"
+    ],
+    "starter": "../.venv/bin/python starter.py",
+    "expect": "Started order-1",
+    "wait": 5,
+    "cleanup": [
+      "temporal workflow terminate --workflow-id order-1 --reason live-check"
+    ]
+  },
+  {
+    "dir": "python/solution_03_retries",
+    "workers": [
+      "../.venv/bin/python worker.py"
+    ],
+    "starter": "../.venv/bin/python starter.py",
+    "expect": "charged on attempt 3",
+    "wait": 5,
+    "cleanup": []
+  },
+  {
+    "dir": "python/solution_04_messages",
+    "workers": [
+      "../.venv/bin/python worker.py"
+    ],
+    "starter": "../.venv/bin/python starter.py",
+    "expect": "Started transfer-1",
+    "wait": 5,
+    "cleanup": [
+      "temporal workflow terminate --workflow-id transfer-1 --reason live-check"
+    ]
+  },
+  {
+    "dir": "java/solution_01_hello",
+    "workers": [
+      "mvn -q compile exec:java@worker"
+    ],
+    "starter": "mvn -q compile exec:java@starter",
+    "expect": "Hello, Temporal!",
+    "wait": 20,
+    "cleanup": []
+  },
+  {
+    "dir": "java/solution_02_durable_execution",
+    "workers": [
+      "mvn -q compile exec:java@worker"
+    ],
+    "starter": "mvn -q compile exec:java@starter",
+    "expect": "Started order-1",
+    "wait": 20,
+    "cleanup": [
+      "temporal workflow terminate --workflow-id order-1 --reason live-check"
+    ]
+  },
+  {
+    "dir": "java/solution_03_retries",
+    "workers": [
+      "mvn -q compile exec:java@worker"
+    ],
+    "starter": "mvn -q compile exec:java@starter",
+    "expect": "charged on attempt 3",
+    "wait": 20,
+    "cleanup": []
+  },
+  {
+    "dir": "java/solution_04_messages",
+    "workers": [
+      "mvn -q compile exec:java@worker"
+    ],
+    "starter": "mvn -q compile exec:java@starter",
+    "expect": "Started transfer-1",
+    "wait": 20,
+    "cleanup": [
+      "temporal workflow terminate --workflow-id transfer-1 --reason live-check"
+    ]
+  }
+]

@@ -137,7 +137,7 @@ def main() -> int:
     check_root_table(total)
     check_banned()
     check_cross_imports()
-    print(f"structure: {total} exercise pair(s) per language checked")
+    print(f"structure: {total} exercise folder(s) checked across python and java")
     for e in errors:
         print(f"  FAIL {e}")
     print("structure: " + ("FAILED" if errors else "OK"))
