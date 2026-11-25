@@ -27,6 +27,7 @@ A learn-and-practice resource for Temporal. Each concept has a plain-words expla
 - An exercise has `TODO N start` / `TODO N end` markers. Unfinished code fails with a message that names the TODO: `NotImplementedError` / `UnsupportedOperationException` in normal code, and a non-retryable `ApplicationError` / `ApplicationFailure` inside a Workflow (a plain exception there would retry forever). Write the solution with `TODO N start` / `TODO N end` markers and generate the exercise with `python3 scripts/make_exercise.py <solution folder>`.
 - Every TODO number is listed in the exercise README checklist.
 - The solution has the same files, all TODOs done, tests passing.
+- A recorded `history.json` contains your host name in every `identity` field. Replace it with `1@devdays` before you commit (`sed -E 's/[0-9]+@[^"]+/1@devdays/'`); the checker rejects host names.
 - Never edit a `solution/` folder when you only mean to change the `exercise/` next to it, and the reverse.
 - A README is minimal: goal in two lines, run commands, task checklist, what the check expects, one stretch task. The teaching lives in the concept file.
 - Concept files use these headings: `## The problem`, `## The idea`, `## Picture`, `## Use it when`, `## Don't use it when`, `## Common mistake`, `## Learn more`. Links go to docs.temporal.io and are checked before they are added.

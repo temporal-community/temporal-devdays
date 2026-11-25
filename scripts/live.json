@@ -86,5 +86,75 @@
     "cleanup": [
       "temporal workflow terminate --workflow-id transfer-1 --reason live-check"
     ]
+  },
+  {
+    "dir": "python/05_history_replay/solution",
+    "workers": [
+      "../../.venv/bin/python worker.py"
+    ],
+    "starter": "../../.venv/bin/python starter.py",
+    "expect": "TPD-c1-12",
+    "wait": 5,
+    "cleanup": []
+  },
+  {
+    "dir": "python/06_schedules/solution",
+    "workers": [
+      "../../.venv/bin/python worker.py"
+    ],
+    "starter": "../../.venv/bin/python create.py",
+    "expect": "Created nightly-report",
+    "wait": 5,
+    "cleanup": [
+      "temporal schedule delete --schedule-id nightly-report"
+    ],
+    "before": [
+      "temporal schedule delete --schedule-id nightly-report"
+    ]
+  },
+  {
+    "dir": "python/07_standalone_activities/solution",
+    "workers": [
+      "../../.venv/bin/python worker.py"
+    ],
+    "starter": "../../.venv/bin/python run_standalone.py",
+    "expect": "sent 'Welcome!' to user-123",
+    "wait": 5,
+    "cleanup": []
+  },
+  {
+    "dir": "java/05_history_replay/solution",
+    "workers": [
+      "mvn -q compile exec:java@worker"
+    ],
+    "starter": "mvn -q compile exec:java@starter",
+    "expect": "TPD-c1-12",
+    "wait": 20,
+    "cleanup": []
+  },
+  {
+    "dir": "java/06_schedules/solution",
+    "workers": [
+      "mvn -q compile exec:java@worker"
+    ],
+    "starter": "mvn -q compile exec:java@starter",
+    "expect": "Created nightly-report",
+    "wait": 20,
+    "cleanup": [
+      "temporal schedule delete --schedule-id nightly-report"
+    ],
+    "before": [
+      "temporal schedule delete --schedule-id nightly-report"
+    ]
+  },
+  {
+    "dir": "java/07_standalone_activities/solution",
+    "workers": [
+      "mvn -q compile exec:java@worker"
+    ],
+    "starter": "mvn -q compile exec:java@starter",
+    "expect": "sent 'Welcome!' to user-123",
+    "wait": 20,
+    "cleanup": []
   }
 ]
