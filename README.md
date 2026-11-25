@@ -17,7 +17,7 @@ git clone https://github.com/temporal-community/temporal-devdays.git
 cd temporal-devdays
 temporal server start-dev      # keep running, Web UI at http://localhost:8233
 ```
-Then check that exercise 1 runs: see the first row of the table below.
+Then open exercise 1 in the table below and run its check.
 
 ## How to use it
 1. Read the concept.
@@ -30,7 +30,10 @@ A failing check at the start is expected. It tells you which TODO is next.
 ## Exercises
 | # | Concept | Python | Java |
 |---|---|---|---|
-| | The first exercises land in the next pull request. | | |
+| 01 | [Workflow, Activity, Worker](concepts/01-hello.md) | [exercise](python/exercise_01_hello) · [solution](python/solution_01_hello) | [exercise](java/exercise_01_hello) · [solution](java/solution_01_hello) |
+| 02 | [Durable execution](concepts/02-durable-execution.md) | [exercise](python/exercise_02_durable_execution) · [solution](python/solution_02_durable_execution) | [exercise](java/exercise_02_durable_execution) · [solution](java/solution_02_durable_execution) |
+| 03 | [Retries and timeouts](concepts/03-retries.md) | [exercise](python/exercise_03_retries) · [solution](python/solution_03_retries) | [exercise](java/exercise_03_retries) · [solution](java/solution_03_retries) |
+| 04 | [Signals, Queries and Updates](concepts/04-messages.md) | [exercise](python/exercise_04_messages) · [solution](python/solution_04_messages) | [exercise](java/exercise_04_messages) · [solution](java/solution_04_messages) |
 
 ## Troubleshooting
 - Port 7233 in use: another dev server is running. Stop it, or use it.
