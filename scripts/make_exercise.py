@@ -1,6 +1,6 @@
 """Build an exercise folder from a solution folder.
 
-Usage: python3 scripts/make_exercise.py python/solution_01_hello
+Usage: python3 scripts/make_exercise.py python/01_hello/solution
 
 Markers in the solution:
     # TODO 1 start: hint            (Python)   // TODO 1 start: hint   (Java)
@@ -63,9 +63,9 @@ def convert(text: str, lang: str) -> str:
 
 def main() -> None:
     src = Path(sys.argv[1]).resolve()
-    if not src.name.startswith("solution_"):
-        sys.exit("expected a solution_* folder")
-    dst = src.with_name(src.name.replace("solution_", "exercise_", 1))
+    if src.name != "solution":
+        sys.exit("expected a folder named solution")
+    dst = src.with_name("exercise")
     for item in src.rglob("*"):
         rel = item.relative_to(src)
         if set(rel.parts) & SKIP or item.is_dir():

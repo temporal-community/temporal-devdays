@@ -3,7 +3,7 @@ name: Bug or unclear step
 about: Something failed or confused you
 ---
 
-**Exercise** (for example python/exercise_01_hello):
+**Exercise** (for example python/01_hello/exercise):
 
 **What you ran:**
 

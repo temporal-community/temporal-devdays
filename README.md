@@ -21,19 +21,19 @@ Then open exercise 1 in the table below and run its check.
 
 ## How to use it
 1. Read the concept.
-2. Open `exercise_NN` in your language and finish the TODOs.
+2. Open the topic folder in your language and go into `exercise` and finish the TODOs.
 3. Run the check until it passes.
-4. Compare with `solution_NN`.
+4. Compare with the `solution` folder next to it.
 
 A failing check at the start is expected. It tells you which TODO is next.
 
 ## Exercises
 | # | Concept | Python | Java |
 |---|---|---|---|
-| 01 | [Workflow, Activity, Worker](concepts/01-hello.md) | [exercise](python/exercise_01_hello) · [solution](python/solution_01_hello) | [exercise](java/exercise_01_hello) · [solution](java/solution_01_hello) |
-| 02 | [Durable execution](concepts/02-durable-execution.md) | [exercise](python/exercise_02_durable_execution) · [solution](python/solution_02_durable_execution) | [exercise](java/exercise_02_durable_execution) · [solution](java/solution_02_durable_execution) |
-| 03 | [Retries and timeouts](concepts/03-retries.md) | [exercise](python/exercise_03_retries) · [solution](python/solution_03_retries) | [exercise](java/exercise_03_retries) · [solution](java/solution_03_retries) |
-| 04 | [Signals, Queries and Updates](concepts/04-messages.md) | [exercise](python/exercise_04_messages) · [solution](python/solution_04_messages) | [exercise](java/exercise_04_messages) · [solution](java/solution_04_messages) |
+| 01 | [Workflow, Activity, Worker](concepts/01-hello.md) | [exercise](python/01_hello/exercise) · [solution](python/01_hello/solution) | [exercise](java/01_hello/exercise) · [solution](java/01_hello/solution) |
+| 02 | [Durable execution](concepts/02-durable-execution.md) | [exercise](python/02_durable_execution/exercise) · [solution](python/02_durable_execution/solution) | [exercise](java/02_durable_execution/exercise) · [solution](java/02_durable_execution/solution) |
+| 03 | [Retries and timeouts](concepts/03-retries.md) | [exercise](python/03_retries/exercise) · [solution](python/03_retries/solution) | [exercise](java/03_retries/exercise) · [solution](java/03_retries/solution) |
+| 04 | [Signals, Queries and Updates](concepts/04-messages.md) | [exercise](python/04_messages/exercise) · [solution](python/04_messages/solution) | [exercise](java/04_messages/exercise) · [solution](java/04_messages/solution) |
 
 ## Troubleshooting
 - Port 7233 in use: another dev server is running. Stop it, or use it.

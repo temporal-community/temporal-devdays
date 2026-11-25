@@ -23,26 +23,23 @@ def walk(pattern: str):
             yield p
 
 
-def exercise_dirs(lang: str, prefix: str) -> dict[str, Path]:
+def topics(lang: str) -> dict[str, Path]:
     base = ROOT / lang
-    return {d.name[len(prefix):]: d for d in sorted(base.glob(prefix + "[0-9][0-9]_*")) if d.is_dir()}
+    return {d.name: d for d in sorted(base.glob("[0-9][0-9]_*")) if d.is_dir()}
 
 
 def check_pairs() -> int:
     names = {}
     total = 0
     for lang in LANGS:
-        ex = exercise_dirs(lang, "exercise_")
-        so = exercise_dirs(lang, "solution_")
-        names[lang] = set(ex)
-        total += len(ex)
-        for n in ex.keys() - so.keys():
-            fail(f"{lang}/exercise_{n} has no solution_{n}")
-        for n in so.keys() - ex.keys():
-            fail(f"{lang}/solution_{n} has no exercise_{n}")
+        names[lang] = set(topics(lang))
+        for name, d in topics(lang).items():
+            for role in ("exercise", "solution"):
+                total += 1
+                if not (d / role).is_dir():
+                    fail(f"{lang}/{name} has no {role}/ folder")
     if names["python"] != names["java"]:
-        diff = names["python"] ^ names["java"]
-        fail(f"python and java exercises differ: {sorted(diff)}")
+        fail(f"python and java topics differ: {sorted(names['python'] ^ names['java'])}")
     return total
 
 
@@ -54,9 +51,12 @@ def has_tests(d: Path, lang: str) -> bool:
 
 def check_exercise_folders() -> None:
     for lang in LANGS:
-        for prefix in ("exercise_", "solution_"):
-            for name, d in exercise_dirs(lang, prefix).items():
-                rel = f"{lang}/{prefix}{name}"
+        for name, topic in topics(lang).items():
+            for role in ("exercise", "solution"):
+                d = topic / role
+                if not d.is_dir():
+                    continue
+                rel = f"{lang}/{name}/{role}"
                 readme = d / "README.md"
                 if not readme.exists():
                     fail(f"{rel} has no README.md")
@@ -70,15 +70,15 @@ def check_exercise_folders() -> None:
                     fail(f"{rel}/README.md does not link to concepts/{concepts[0].name}")
                 if not has_tests(d, lang):
                     fail(f"{rel} has no tests")
-                if prefix == "exercise_":
+                if role == "exercise":
                     sources = [p for p in d.rglob("*") if p.suffix in (".py", ".java") and not (set(p.relative_to(d).parts) & SKIP_DIRS)]
                     body = "\n".join(p.read_text() for p in sources)
                     todos = sorted(set(re.findall(r"TODO (\d+) start", body)))
                     if not todos:
                         fail(f"{rel} has no 'TODO N start' markers")
-                    for t in todos:
-                        if f"TODO {t}" not in text:
-                            fail(f"{rel}/README.md does not list TODO {t}")
+                    for n in todos:
+                        if f"TODO {n}" not in text:
+                            fail(f"{rel}/README.md does not list TODO {n}")
 
 
 def check_concepts() -> None:
@@ -103,9 +103,10 @@ def check_links() -> None:
 def check_root_table(total: int) -> None:
     text = (ROOT / "README.md").read_text()
     for lang in LANGS:
-        for name in exercise_dirs(lang, "exercise_"):
-            if f"{lang}/exercise_{name}" not in text or f"{lang}/solution_{name}" not in text:
-                fail(f"README.md table is missing {lang}/exercise_{name} or its solution")
+        for name in topics(lang):
+            for role in ("exercise", "solution"):
+                if f"{lang}/{name}/{role}" not in text:
+                    fail(f"README.md table is missing {lang}/{name}/{role}")
 
 
 def check_banned() -> None:
@@ -137,7 +138,7 @@ def main() -> int:
     check_root_table(total)
     check_banned()
     check_cross_imports()
-    print(f"structure: {total} exercise folder(s) checked across python and java")
+    print(f"structure: {total} exercise and solution folder(s) checked across python and java")
     for e in errors:
         print(f"  FAIL {e}")
     print("structure: " + ("FAILED" if errors else "OK"))

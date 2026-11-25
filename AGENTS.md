@@ -12,12 +12,12 @@ A learn-and-practice resource for Temporal. Each concept has a plain-words expla
 | Run every check (no server needed) | `make check` |
 | Run checks plus live smoke tests | `make check-live` (needs `temporal server start-dev`) |
 | Dev server and Web UI | `temporal server start-dev` then http://localhost:8233 |
-| Python exercise | `cd python/exercise_NN_x && uv run pytest` |
-| Java exercise | `cd java/exercise_NN_x && mvn test` |
+| Python exercise | `cd python/NN_topic/exercise && uv run pytest` |
+| Java exercise | `cd java/NN_topic/exercise && mvn test` |
 
 ## Repo map
 - `concepts/NN-topic.md`: one explanation per topic, shared by both languages.
-- `python/` and `java/`: folders `exercise_NN_topic/` and `solution_NN_topic/`. Same NN and topic name in both languages.
+- `python/` and `java/`: one folder per topic, `NN_topic/`, with `exercise/` and `solution/` inside. Same NN and topic name in both languages.
 - `scripts/`: `check.sh`, `verify_repo.py` (structure), `behaviour.py` (tests and live smoke), `live.json` (live smoke table).
 - `demos/`: larger demos, added later, one per PR.
 
@@ -27,7 +27,7 @@ A learn-and-practice resource for Temporal. Each concept has a plain-words expla
 - An exercise has `TODO N start` / `TODO N end` markers. Unfinished code fails with a message that names the TODO: `NotImplementedError` / `UnsupportedOperationException` in normal code, and a non-retryable `ApplicationError` / `ApplicationFailure` inside a Workflow (a plain exception there would retry forever). Write the solution with `TODO N start` / `TODO N end` markers and generate the exercise with `python3 scripts/make_exercise.py <solution folder>`.
 - Every TODO number is listed in the exercise README checklist.
 - The solution has the same files, all TODOs done, tests passing.
-- Never edit a `solution_*` folder when you only mean to change an `exercise_*`, and the reverse.
+- Never edit a `solution/` folder when you only mean to change the `exercise/` next to it, and the reverse.
 - A README is minimal: goal in two lines, run commands, task checklist, what the check expects, one stretch task. The teaching lives in the concept file.
 - Concept files use these headings: `## The problem`, `## The idea`, `## Picture`, `## Use it when`, `## Don't use it when`, `## Common mistake`, `## Learn more`. Links go to docs.temporal.io and are checked before they are added.
 

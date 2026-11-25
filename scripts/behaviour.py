@@ -32,10 +32,10 @@ def record(name: str, ok: bool, note: str = "") -> None:
 
 
 def pairs(lang: str):
-    for ex in sorted((ROOT / lang).glob("exercise_[0-9][0-9]_*")):
-        so = ROOT / lang / ex.name.replace("exercise_", "solution_", 1)
-        if so.is_dir():
-            yield ex, so
+    for topic in sorted((ROOT / lang).glob("[0-9][0-9]_*")):
+        ex, so = topic / "exercise", topic / "solution"
+        if ex.is_dir() and so.is_dir():
+            yield topic.name, ex, so
 
 
 def ignore(_dir, names):
@@ -44,13 +44,13 @@ def ignore(_dir, names):
 
 def behaviour() -> None:
     for lang in LANGS:
-        for ex, so in pairs(lang):
+        for topic, ex, so in pairs(lang):
             code, _ = run(lang, so)
-            record(f"{lang}/{so.name}: solution passes", code == 0)
+            record(f"{lang}/{topic}: solution passes", code == 0)
             code, out = run(lang, ex)
             broken = any(w in out for w in ("SyntaxError", "COMPILATION ERROR", "ImportError", "ModuleNotFoundError"))
             failed_on_todo = code != 0 and "TODO" in out and not broken
-            record(f"{lang}/{ex.name}: fails on a TODO", failed_on_todo,
+            record(f"{lang}/{topic}: exercise fails on a TODO", failed_on_todo,
                    "" if failed_on_todo else ("passed unexpectedly" if code == 0 else ("failed on a syntax, compile or import error" if broken else "failed, but not on a TODO")))
             with tempfile.TemporaryDirectory() as tmp:
                 work = Path(tmp) / ex.name
@@ -63,7 +63,7 @@ def behaviour() -> None:
                         shutil.rmtree(dest) if dest.is_dir() else dest.unlink()
                     shutil.copytree(item, dest, ignore=ignore) if item.is_dir() else shutil.copy2(item, dest)
                 code, _ = run(lang, work)
-            record(f"{lang}/{ex.name}: overlay passes", code == 0)
+            record(f"{lang}/{topic}: overlay passes", code == 0)
 
 
 def live() -> None:
