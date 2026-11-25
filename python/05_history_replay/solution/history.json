@@ -1,0 +1,352 @@
+{
+  "events": [
+    {
+      "eventId": "1",
+      "eventTime": "2026-11-25T19:55:05.696Z",
+      "eventType": "EVENT_TYPE_WORKFLOW_EXECUTION_STARTED",
+      "workflowExecutionStartedEventAttributes": {
+        "workflowType": {
+          "name": "PizzaWorkflow"
+        },
+        "taskQueue": {
+          "name": "pizza"
+        },
+        "input": {
+          "payloads": [
+            {
+              "metadata": {
+                "encoding": "anNvbi9wbGFpbg=="
+              },
+              "data": "eyJhZGRyZXNzIjoiMSBNYWluIFN0IiwiY3VzdG9tZXIiOnsiaWQiOiJjMSJ9LCJpc19kZWxpdmVyeSI6dHJ1ZSwiaXRlbXMiOlt7Im5hbWUiOiJNYXJnaGVyaXRhIiwicHJpY2UiOjEyfV0sInByZXBfc2Vjb25kcyI6MTgwMH0="
+            }
+          ]
+        },
+        "workflowExecutionTimeout": "315360000s",
+        "workflowRunTimeout": "315360000s",
+        "workflowTaskTimeout": "10s",
+        "originalExecutionRunId": "6ad23060-e184-4034-946e-619748760382",
+        "identity": "1@devdays",
+        "firstExecutionRunId": "6ad23060-e184-4034-946e-619748760382",
+        "attempt": 1,
+        "firstWorkflowTaskBackoff": "0s",
+        "priority": {}
+      }
+    },
+    {
+      "eventId": "2",
+      "eventTime": "2026-11-25T19:55:05.696Z",
+      "eventType": "EVENT_TYPE_WORKFLOW_TASK_SCHEDULED",
+      "workflowTaskScheduledEventAttributes": {
+        "taskQueue": {
+          "name": "pizza"
+        },
+        "startToCloseTimeout": "10s",
+        "attempt": 1
+      }
+    },
+    {
+      "eventId": "3",
+      "eventTime": "2026-11-25T19:55:05.697Z",
+      "eventType": "EVENT_TYPE_WORKFLOW_TASK_STARTED",
+      "workflowTaskStartedEventAttributes": {
+        "scheduledEventId": "2",
+        "identity": "1@devdays",
+        "historySizeBytes": "383"
+      }
+    },
+    {
+      "eventId": "4",
+      "eventTime": "2026-11-25T19:55:05.713Z",
+      "eventType": "EVENT_TYPE_WORKFLOW_TASK_COMPLETED",
+      "workflowTaskCompletedEventAttributes": {
+        "scheduledEventId": "2",
+        "identity": "1@devdays",
+        "binaryChecksum": "2099b733396b5ac2f04ab3cd97365763",
+        "sdkMetadata": {
+          "coreUsedFlags": [
+            2,
+            1,
+            3,
+            4
+          ],
+          "sdkName": "temporal-python",
+          "sdkVersion": "1.37.0"
+        },
+        "meteringMetadata": {}
+      }
+    },
+    {
+      "eventId": "5",
+      "eventTime": "2026-11-25T19:55:05.713Z",
+      "eventType": "EVENT_TYPE_ACTIVITY_TASK_SCHEDULED",
+      "activityTaskScheduledEventAttributes": {
+        "activityId": "1",
+        "activityType": {
+          "name": "get_distance"
+        },
+        "taskQueue": {
+          "name": "pizza",
+          "kind": "TASK_QUEUE_KIND_NORMAL"
+        },
+        "header": {},
+        "input": {
+          "payloads": [
+            {
+              "metadata": {
+                "encoding": "anNvbi9wbGFpbg=="
+              },
+              "data": "IjEgTWFpbiBTdCI="
+            }
+          ]
+        },
+        "scheduleToCloseTimeout": "315360000s",
+        "scheduleToStartTimeout": "315360000s",
+        "startToCloseTimeout": "5s",
+        "heartbeatTimeout": "0s",
+        "workflowTaskCompletedEventId": "3",
+        "retryPolicy": {
+          "initialInterval": "1s",
+          "backoffCoefficient": 2.0,
+          "maximumInterval": "100s"
+        },
+        "priority": {}
+      }
+    },
+    {
+      "eventId": "6",
+      "eventTime": "2026-11-25T19:55:05.713Z",
+      "eventType": "EVENT_TYPE_ACTIVITY_TASK_STARTED",
+      "activityTaskStartedEventAttributes": {
+        "scheduledEventId": "5",
+        "identity": "1@devdays",
+        "attempt": 1
+      }
+    },
+    {
+      "eventId": "7",
+      "eventTime": "2026-11-25T19:55:05.715Z",
+      "eventType": "EVENT_TYPE_ACTIVITY_TASK_COMPLETED",
+      "activityTaskCompletedEventAttributes": {
+        "result": {
+          "payloads": [
+            {
+              "metadata": {
+                "encoding": "anNvbi9wbGFpbg=="
+              },
+              "data": "MTA="
+            }
+          ]
+        },
+        "scheduledEventId": "5",
+        "startedEventId": "6",
+        "identity": "1@devdays"
+      }
+    },
+    {
+      "eventId": "8",
+      "eventTime": "2026-11-25T19:55:05.715Z",
+      "eventType": "EVENT_TYPE_WORKFLOW_TASK_SCHEDULED",
+      "workflowTaskScheduledEventAttributes": {
+        "taskQueue": {
+          "name": "pizza"
+        },
+        "startToCloseTimeout": "10s",
+        "attempt": 1
+      }
+    },
+    {
+      "eventId": "9",
+      "eventTime": "2026-11-25T19:55:05.715Z",
+      "eventType": "EVENT_TYPE_WORKFLOW_TASK_STARTED",
+      "workflowTaskStartedEventAttributes": {
+        "scheduledEventId": "8",
+        "identity": "1@devdays",
+        "historySizeBytes": "890"
+      }
+    },
+    {
+      "eventId": "10",
+      "eventTime": "2026-11-25T19:55:05.717Z",
+      "eventType": "EVENT_TYPE_WORKFLOW_TASK_COMPLETED",
+      "workflowTaskCompletedEventAttributes": {
+        "scheduledEventId": "8",
+        "identity": "1@devdays",
+        "binaryChecksum": "2099b733396b5ac2f04ab3cd97365763",
+        "sdkMetadata": {},
+        "meteringMetadata": {}
+      }
+    },
+    {
+      "eventId": "11",
+      "eventTime": "2026-11-25T19:55:05.717Z",
+      "eventType": "EVENT_TYPE_TIMER_STARTED",
+      "timerStartedEventAttributes": {
+        "timerId": "1",
+        "startToFireTimeout": "1800s",
+        "workflowTaskCompletedEventId": "9"
+      }
+    },
+    {
+      "eventId": "12",
+      "eventTime": "2026-11-25T20:25:05.717Z",
+      "eventType": "EVENT_TYPE_TIMER_FIRED",
+      "timerFiredEventAttributes": {
+        "timerId": "1",
+        "startedEventId": "11"
+      }
+    },
+    {
+      "eventId": "13",
+      "eventTime": "2026-11-25T20:25:05.717Z",
+      "eventType": "EVENT_TYPE_WORKFLOW_TASK_SCHEDULED",
+      "workflowTaskScheduledEventAttributes": {
+        "taskQueue": {
+          "name": "pizza"
+        },
+        "startToCloseTimeout": "10s",
+        "attempt": 1
+      }
+    },
+    {
+      "eventId": "14",
+      "eventTime": "2026-11-25T20:25:05.717Z",
+      "eventType": "EVENT_TYPE_WORKFLOW_TASK_STARTED",
+      "workflowTaskStartedEventAttributes": {
+        "scheduledEventId": "13",
+        "identity": "1@devdays",
+        "historySizeBytes": "1135"
+      }
+    },
+    {
+      "eventId": "15",
+      "eventTime": "2026-11-25T20:25:05.718Z",
+      "eventType": "EVENT_TYPE_WORKFLOW_TASK_COMPLETED",
+      "workflowTaskCompletedEventAttributes": {
+        "scheduledEventId": "13",
+        "identity": "1@devdays",
+        "binaryChecksum": "2099b733396b5ac2f04ab3cd97365763",
+        "sdkMetadata": {},
+        "meteringMetadata": {}
+      }
+    },
+    {
+      "eventId": "16",
+      "eventTime": "2026-11-25T20:25:05.718Z",
+      "eventType": "EVENT_TYPE_ACTIVITY_TASK_SCHEDULED",
+      "activityTaskScheduledEventAttributes": {
+        "activityId": "2",
+        "activityType": {
+          "name": "send_bill"
+        },
+        "taskQueue": {
+          "name": "pizza",
+          "kind": "TASK_QUEUE_KIND_NORMAL"
+        },
+        "header": {},
+        "input": {
+          "payloads": [
+            {
+              "metadata": {
+                "encoding": "anNvbi9wbGFpbg=="
+              },
+              "data": "eyJhbW91bnQiOjEyLCJjdXN0b21lcl9pZCI6ImMxIn0="
+            }
+          ]
+        },
+        "scheduleToCloseTimeout": "315360000s",
+        "scheduleToStartTimeout": "315360000s",
+        "startToCloseTimeout": "5s",
+        "heartbeatTimeout": "0s",
+        "workflowTaskCompletedEventId": "14",
+        "retryPolicy": {
+          "initialInterval": "1s",
+          "backoffCoefficient": 2.0,
+          "maximumInterval": "100s"
+        },
+        "priority": {}
+      }
+    },
+    {
+      "eventId": "17",
+      "eventTime": "2026-11-25T20:25:05.718Z",
+      "eventType": "EVENT_TYPE_ACTIVITY_TASK_STARTED",
+      "activityTaskStartedEventAttributes": {
+        "scheduledEventId": "16",
+        "identity": "1@devdays",
+        "attempt": 1
+      }
+    },
+    {
+      "eventId": "18",
+      "eventTime": "2026-11-25T20:25:05.718Z",
+      "eventType": "EVENT_TYPE_ACTIVITY_TASK_COMPLETED",
+      "activityTaskCompletedEventAttributes": {
+        "result": {
+          "payloads": [
+            {
+              "metadata": {
+                "encoding": "anNvbi9wbGFpbg=="
+              },
+              "data": "IlRQRC1jMS0xMiI="
+            }
+          ]
+        },
+        "scheduledEventId": "16",
+        "startedEventId": "17",
+        "identity": "1@devdays"
+      }
+    },
+    {
+      "eventId": "19",
+      "eventTime": "2026-11-25T20:25:05.718Z",
+      "eventType": "EVENT_TYPE_WORKFLOW_TASK_SCHEDULED",
+      "workflowTaskScheduledEventAttributes": {
+        "taskQueue": {
+          "name": "pizza"
+        },
+        "startToCloseTimeout": "10s",
+        "attempt": 1
+      }
+    },
+    {
+      "eventId": "20",
+      "eventTime": "2026-11-25T20:25:05.718Z",
+      "eventType": "EVENT_TYPE_WORKFLOW_TASK_STARTED",
+      "workflowTaskStartedEventAttributes": {
+        "scheduledEventId": "19",
+        "identity": "1@devdays",
+        "historySizeBytes": "1639"
+      }
+    },
+    {
+      "eventId": "21",
+      "eventTime": "2026-11-25T20:25:05.719Z",
+      "eventType": "EVENT_TYPE_WORKFLOW_TASK_COMPLETED",
+      "workflowTaskCompletedEventAttributes": {
+        "scheduledEventId": "19",
+        "identity": "1@devdays",
+        "binaryChecksum": "2099b733396b5ac2f04ab3cd97365763",
+        "sdkMetadata": {},
+        "meteringMetadata": {}
+      }
+    },
+    {
+      "eventId": "22",
+      "eventTime": "2026-11-25T20:25:05.719Z",
+      "eventType": "EVENT_TYPE_WORKFLOW_EXECUTION_COMPLETED",
+      "workflowExecutionCompletedEventAttributes": {
+        "result": {
+          "payloads": [
+            {
+              "metadata": {
+                "encoding": "anNvbi9wbGFpbg=="
+              },
+              "data": "IlRQRC1jMS0xMiI="
+            }
+          ]
+        },
+        "workflowTaskCompletedEventId": "20"
+      }
+    }
+  ]
+}
