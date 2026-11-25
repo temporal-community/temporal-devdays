@@ -34,6 +34,10 @@ A failing check at the start is expected. It tells you which TODO is next.
 | 02 | [Durable execution](concepts/02-durable-execution.md) | [exercise](python/02_durable_execution/exercise) · [solution](python/02_durable_execution/solution) | [exercise](java/02_durable_execution/exercise) · [solution](java/02_durable_execution/solution) |
 | 03 | [Retries and timeouts](concepts/03-retries.md) | [exercise](python/03_retries/exercise) · [solution](python/03_retries/solution) | [exercise](java/03_retries/exercise) · [solution](java/03_retries/solution) |
 | 04 | [Signals, Queries and Updates](concepts/04-messages.md) | [exercise](python/04_messages/exercise) · [solution](python/04_messages/solution) | [exercise](java/04_messages/exercise) · [solution](java/04_messages/solution) |
+| 05 | [Event History and replay](concepts/05-history-replay.md) | [exercise](python/05_history_replay/exercise) · [solution](python/05_history_replay/solution) | [exercise](java/05_history_replay/exercise) · [solution](java/05_history_replay/solution) |
+| 06 | [Schedules](concepts/06-schedules.md) | [exercise](python/06_schedules/exercise) · [solution](python/06_schedules/solution) | [exercise](java/06_schedules/exercise) · [solution](java/06_schedules/solution) |
+| 07 | [Standalone Activities](concepts/07-standalone-activities.md) | [exercise](python/07_standalone_activities/exercise) · [solution](python/07_standalone_activities/solution) | [exercise](java/07_standalone_activities/exercise) · [solution](java/07_standalone_activities/solution) |
+| 08 | [Testing](concepts/08-testing.md) | [exercise](python/08_testing/exercise) · [solution](python/08_testing/solution) | [exercise](java/08_testing/exercise) · [solution](java/08_testing/solution) |
 
 ## Troubleshooting
 - Port 7233 in use: another dev server is running. Stop it, or use it.
