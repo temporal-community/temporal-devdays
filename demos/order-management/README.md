@@ -17,12 +17,45 @@ flowchart LR
     T <-->|shipping queue| S["shipping service<br/>ship_item"]
 ```
 
-| Service | Task queue | Owns | Called by |
-|---|---|---|---|
-| orders | `orders` | the Workflows: `OrderWorkflow` and its child `ShipmentWorkflow` | the web app |
-| inventory | `inventory` | `check_stock`, `reserve_stock`, `release_stock` | `OrderWorkflow` |
-| payments | `payments` | `charge` | `OrderWorkflow` |
-| shipping | `shipping` | `ship_item` | `ShipmentWorkflow`, once per item in parallel |
+| Service | Task queue | Holds | Kind | Called by |
+|---|---|---|---|---|
+| orders | `orders` | `OrderWorkflow`, `ShipmentWorkflow` | 2 Workflows, no Activities | the web app |
+| inventory | `inventory` | `check_stock`, `reserve_stock`, `release_stock` | 3 Activities | `OrderWorkflow` |
+| payments | `payments` | `charge` | 1 Activity | `OrderWorkflow` |
+| shipping | `shipping` | `ship_item` | 1 Activity | `ShipmentWorkflow`, once per item in parallel |
+
+A service is a Worker listening on one task queue. It holds Activities (or, for `orders`, Workflows). A service is not itself an Activity.
+
+### The words used here
+
+| Word | Meaning in this demo | Example |
+|---|---|---|
+| Workflow | the plan for one order. It decides what happens next and does no real work itself | `OrderWorkflow` |
+| Child Workflow | a Workflow started by another Workflow, with its own history | `ShipmentWorkflow`, ID `ship-<order id>` |
+| Activity | one step that does real work. It can fail and be retried | `charge`, `ship_item` |
+| Service | a Worker plus its task queue | `payments` |
+| Task queue | the mailbox Temporal uses to hand work to a service | `payments` |
+| Worker | the program that listens at a queue and runs the work | each terminal window |
+| Signal | a message that tells a running Workflow something, no answer back | `approve` |
+| Update | a message that changes a running Workflow and returns an answer, and can be rejected | `change_address` |
+| Query | a read-only question to a running Workflow | `status` |
+| Retry Policy | how Temporal retries a failed Activity | `charge` fails twice, then passes |
+| Saga | undoing earlier steps when a later step fails | `release_stock` after a declined card |
+
+### One order, step by step
+
+| # | What happens | Runs in | Queue | Kind |
+|---|---|---|---|---|
+| 1 | the web app starts the order | web app, then Temporal | none | start Workflow |
+| 2 | check stock | inventory | `inventory` | Activity |
+| 3 | reserve stock | inventory | `inventory` | Activity |
+| 4 | wait for approval (**Needs approval** only) | `orders` | none | Workflow waits for a Signal |
+| 5 | charge the card | payments | `payments` | Activity |
+| 6 | start the shipment | `orders` | `orders` | child Workflow |
+| 7 | ship the 3 items at the same time | shipping | `shipping` | 3 Activities |
+| 8 | the order is done | `orders` | none | Workflow returns |
+
+If step 5 fails for good, step 3 is undone with `release_stock` and steps 6 and 7 never run, so no `ship-<id>` appears.
 
 What this shows about microservices:
 - **Services never call each other.** The Workflow calls each one by its task queue, so there is no service-to-service HTTP, no queue wiring and no retry code in the services.
@@ -78,12 +111,12 @@ mvn -q compile exec:java@worker -Dexec.args="payments"    # terminal 6
 
 ## Scenarios
 
-| Pick | What happens | Where to look in the Web UI |
-|---|---|---|
-| Happy path | stock, charge, then a child Workflow ships the three items in parallel | `order-<id>` and its child `ship-<id>` |
-| Flaky card | the charge fails twice, the Retry Policy makes attempt 3 pass | the `charge` Activity shows 3 attempts |
-| Bad card | non-retryable error, the reserved stock is released (Saga), order cancelled | `release_stock` runs after `charge` fails |
-| Needs approval | the Workflow waits for a Signal, an Update can change the address first | click Approve, or Change address (a short address is rejected) |
+| Pick | What happens | What it teaches | Where to look in the Web UI |
+|---|---|---|---|
+| Happy path | stock, charge, then a child Workflow ships the three items in parallel | services work together without calling each other | `order-<id>` and its child `ship-<id>` |
+| Flaky card | the charge fails twice, the Retry Policy makes attempt 3 pass | Temporal retries for you, no retry loop in your code | the `charge` Activity shows 3 attempts |
+| Bad card | non-retryable error, the reserved stock is released, order cancelled | some errors must not be retried, so earlier steps are undone (Saga) | `release_stock` runs after `charge` fails |
+| Needs approval | the Workflow waits for a Signal, an Update can change the address first | a Workflow can wait for a person without using a thread | click Approve, or Change address (a short address is rejected) |
 
 ## Test
 
