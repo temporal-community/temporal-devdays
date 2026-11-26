@@ -2,6 +2,7 @@
 With --live also runs the Worker and starter of each solution (needs the dev server).
 Standard library only. Exit code 1 if any row fails."""
 import json
+import re
 import shlex
 import shutil
 import subprocess
@@ -27,9 +28,15 @@ def run(lang: str, d: Path) -> tuple[int, str]:
     return p.returncode, p.stdout + p.stderr
 
 
+LOG_NOISE = re.compile(r"\b(INFO|DEBUG|WARN|TRACE)\b")
+FAILURE = re.compile(r"AssertionFailedError|AssertionError|Tests run:.*(Failures|Errors): [1-9]|FAILED|expected|TODO \d|Error")
+
+
 def last_line(out: str) -> str:
-    lines = [l.strip() for l in out.splitlines() if l.strip()]
-    return " | ".join(lines[-2:])[:200]
+    """The most useful lines of a failed run: real failure lines first, log noise skipped."""
+    lines = [l.strip() for l in out.splitlines() if l.strip() and not LOG_NOISE.search(l)]
+    hits = [l for l in lines if FAILURE.search(l)]
+    return " | ".join(hits[:2] or lines[-2:])[:300]
 
 
 def record(name: str, ok: bool, note: str = "") -> None:
