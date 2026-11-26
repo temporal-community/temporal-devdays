@@ -1,6 +1,6 @@
 # Demo: order management
 
-A small web app that places an order and shows what Temporal does while it runs. It combines ideas from exercises [03](../../concepts/03-retries.md), [04](../../concepts/04-messages.md), [10](../../concepts/10-saga-across-services.md) and [12](../../concepts/12-human-in-the-loop.md).
+A small web app that places an order and shows what Temporal does while it runs. It combines ideas from exercises [03](../../concepts/03-retries.md), [04](../../concepts/04-messages.md), [10](../../concepts/10-saga-across-services.md), [12](../../concepts/12-human-in-the-loop.md) and [13](../../concepts/13-fan-out-fan-in.md).
 
 Inspired by [temporal-order-management-demo](https://github.com/temporal-sa/temporal-order-management-demo). This is a new, smaller implementation, not a copy.
 
