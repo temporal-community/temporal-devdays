@@ -17,6 +17,15 @@ uv run python app.py                   # terminal 3, open http://localhost:5050
 
 Test without a server: `uv run pytest -q`
 
+### Use the Java Worker instead
+The Java Worker has the same Workflow, Activity, Signal, Update and Query names and the same task queue, so the web app works with either one. Run only one Worker at a time.
+
+```bash
+cd demos/order-management/java                    # needs Java 21 and Maven
+mvn -q compile exec:java@worker                   # instead of terminal 2
+mvn -q test                                       # no server needed
+```
+
 ## Scenarios
 
 | Pick | What happens | Where to look in the Web UI |
@@ -33,3 +42,4 @@ Test without a server: `uv run pytest -q`
 - `worker.py`: the Worker on task queue `orders`
 - `app.py` and `templates/index.html`: the web app
 - `tests/test_order.py`: one test per scenario
+- `../java/`: the same Worker in Java (`src/main/java/demo`, tests in `src/test/java/demo`)
