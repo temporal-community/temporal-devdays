@@ -34,6 +34,15 @@ jobs:
         with:
           distribution: temurin
           java-version: "21"
-      - uses: temporalio/setup-temporal@v0.1.0
+      - name: Install the Temporal CLI
+        run: |
+          curl -sSfL "https://temporal.download/cli/archive/latest?platform=linux&arch=amd64" -o temporal.tar.gz
+          tar -xzf temporal.tar.gz temporal
+          sudo mv temporal /usr/local/bin/
+          temporal --version
+      - name: Start the dev server
+        run: |
+          nohup temporal server start-dev --headless > temporal.log 2>&1 &
+          for i in $(seq 1 30); do temporal operator cluster health && break; sleep 1; done
       - run: make setup
       - run: make check-live
