@@ -49,6 +49,7 @@ A failing check at the start is expected. It tells you which TODO is next.
 
 ## Demos
 - [Order management](demos/order-management): a small web app with retries, a Saga, a child Workflow, a Signal and an Update.
+- [Observability](demos/observability): logs, traces, metrics and a Search Attribute, with or without Docker.
 
 ## Troubleshooting
 - Port 7233 in use: another dev server is running. Stop it, or use it.
