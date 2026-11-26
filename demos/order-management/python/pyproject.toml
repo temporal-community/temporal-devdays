@@ -1,0 +1,16 @@
+[project]
+name = "order-management-demo"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = ["temporalio>=1.36.1", "quart>=0.19.7"]
+
+[dependency-groups]
+dev = ["pytest", "pytest-asyncio"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+pythonpath = ["."]
+
+[tool.uv]
+package = false

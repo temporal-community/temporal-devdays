@@ -1,0 +1,54 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Order management demo</title>
+<style>
+  body { font: 16px system-ui; max-width: 36rem; margin: 2rem auto; padding: 0 1rem; }
+  button, select, input { font: inherit; padding: .4rem .6rem; margin: .2rem 0; }
+  #run { display: none; margin-top: 1.5rem; border-top: 1px solid #8884; padding-top: 1rem; }
+  progress { width: 100%; }
+</style>
+<h1>Order management</h1>
+<label>Scenario
+  <select id="scenario">
+    <option value="happy">Happy path</option>
+    <option value="flaky_card">Flaky card (retries)</option>
+    <option value="bad_card">Bad card (cancel and undo)</option>
+    <option value="approval">Needs approval (signal and update)</option>
+  </select>
+</label><br>
+<label>Address <input id="address" value="1 Main St, Redwood"></label><br>
+<button onclick="start()">Place order</button>
+
+<div id="run">
+  <p>Order <b id="oid"></b> · <span id="state"></span></p>
+  <p>Step: <b id="step"></b> · Ship to: <span id="ship"></span></p>
+  <p id="result"></p>
+  <button onclick="post('/approve/')">Approve</button>
+  <input id="newaddr" placeholder="New address">
+  <button onclick="changeAddress()">Change address</button>
+  <p id="msg"></p>
+</div>
+
+<script>
+let id = null, timer = null;
+const $ = (x) => document.getElementById(x);
+const json = (body) => ({ method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+
+async function start() {
+  const r = await fetch("/start", json({ scenario: $("scenario").value, address: $("address").value }));
+  id = (await r.json()).order_id;
+  $("oid").textContent = id; $("run").style.display = "block"; $("result").textContent = ""; $("msg").textContent = "";
+  clearInterval(timer); timer = setInterval(poll, 700); poll();
+}
+async function poll() {
+  const s = await (await fetch("/status/" + id)).json();
+  $("state").textContent = s.state; $("step").textContent = s.step; $("ship").textContent = s.address;
+  if (s.result) { $("result").textContent = "Result: " + s.result; }
+  if (s.state !== "RUNNING") clearInterval(timer);
+}
+async function post(path) { await fetch(path + id, json({})); poll(); }
+async function changeAddress() {
+  const r = await fetch("/address/" + id, json({ address: $("newaddr").value }));
+  $("msg").textContent = (await r.json()).message; poll();
+}
+</script>

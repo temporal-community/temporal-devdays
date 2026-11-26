@@ -47,6 +47,9 @@ A failing check at the start is expected. It tells you which TODO is next.
 | 15 | [Safe deploys](concepts/15-safe-deploys.md) | [exercise](python/15_safe_deploys/exercise) · [solution](python/15_safe_deploys/solution) | [exercise](java/15_safe_deploys/exercise) · [solution](java/15_safe_deploys/solution) |
 | 16 | [An AI agent loop](concepts/16-ai-agent-loop.md) | [exercise](python/16_ai_agent_loop/exercise) · [solution](python/16_ai_agent_loop/solution) | [exercise](java/16_ai_agent_loop/exercise) · [solution](java/16_ai_agent_loop/solution) |
 
+## Demos
+- [Order management](demos/order-management): a small web app with retries, a Saga, a child Workflow, a Signal and an Update.
+
 ## Troubleshooting
 - Port 7233 in use: another dev server is running. Stop it, or use it.
 - A Worker from an earlier run is still polling: stop it before starting a new one.
