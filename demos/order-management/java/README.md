@@ -8,7 +8,7 @@ The same four services and the same web app as the [Python version](../python), 
 |---|---|---|
 | orders | `orders` | `OrderWorkflow`, `ShipmentWorkflow` |
 | inventory | `inventory` | `InventoryActivities` |
-| payments | `payments` | `PaymentActivities` |
+| payments | `payments` | `PaymentActivities`: `charge`, `refund_charge` |
 | shipping | `shipping` | `ShippingActivities` |
 | web app | none | `WebApp`: starts orders and sends the Signal, Update and Query, on port 5050 |
 
@@ -50,7 +50,7 @@ No server needed.
 mvn -q test
 ```
 
-Ten tests. Seven cover the scenarios: happy path, flaky card, bad card, approval Signal, approval timeout, address Update and a rejected address. Three cover the web app: the page, a happy order and the approval flow.
+Eleven tests. Eight cover the scenarios: happy path, flaky card, bad card, shipping fails, approval Signal, approval timeout, address Update and a rejected address. Three cover the web app: the page, a happy order and the approval flow.
 
 ## Where to look
 

@@ -3,10 +3,10 @@ from datetime import timedelta
 
 from temporalio import workflow
 from temporalio.common import RetryPolicy
-from temporalio.exceptions import ActivityError
+from temporalio.exceptions import ActivityError, ChildWorkflowError
 
 with workflow.unsafe.imports_passed_through():
-    from activities import charge, check_stock, release_stock, reserve_stock, ship_item
+    from activities import charge, check_stock, refund_charge, release_stock, reserve_stock, ship_item
     from models import OrderInput, OrderOutput, OrderStatus
 
 OPTS = dict(
@@ -18,9 +18,9 @@ OPTS = dict(
 @workflow.defn
 class ShipmentWorkflow:
     @workflow.run
-    async def run(self, order_id: str, address: str, items: list[str]) -> str:
+    async def run(self, order_id: str, address: str, items: list[str], scenario: str) -> str:
         await asyncio.gather(*[
-            workflow.execute_activity(ship_item, args=[order_id, item], task_queue="shipping", **OPTS)
+            workflow.execute_activity(ship_item, args=[order_id, item, scenario], task_queue="shipping", **OPTS)
             for item in items
         ])
         return f"TRK-{order_id}"
@@ -40,7 +40,7 @@ class OrderWorkflow:
         items = await workflow.execute_activity(check_stock, order, task_queue="inventory", **OPTS)
 
         self.step = "reserving stock"
-        undo = [release_stock]  # registered before the step, as in exercise 10
+        undo = [(release_stock, "inventory")]  # registered before the step, as in exercise 10
         await workflow.execute_activity(reserve_stock, order, task_queue="inventory", **OPTS)
 
         if order.scenario == "approval":
@@ -55,20 +55,24 @@ class OrderWorkflow:
             await workflow.execute_activity(charge, order, task_queue="payments", **OPTS)
         except ActivityError:
             return await self.cancel(order, undo, "card declined")
+        undo.append((refund_charge, "payments"))  # a declined card moved no money, so this is added after the charge
 
         self.step = "shipping"
-        tracking_id = await workflow.execute_child_workflow(
-            ShipmentWorkflow.run,
-            args=[order.order_id, self.address, items],
-            id=f"ship-{order.order_id}",
-        )
+        try:
+            tracking_id = await workflow.execute_child_workflow(
+                ShipmentWorkflow.run,
+                args=[order.order_id, self.address, items, order.scenario],
+                id=f"ship-{order.order_id}",
+            )
+        except ChildWorkflowError:
+            return await self.cancel(order, undo, "shipping failed")
         self.step = "done"
         return OrderOutput("shipped", tracking_id, self.address)
 
     async def cancel(self, order: OrderInput, undo: list, reason: str) -> OrderOutput:
         self.step = "cancelling"
-        for step in reversed(undo):
-            await workflow.execute_activity(step, order, task_queue="inventory", **OPTS)
+        for step, queue in reversed(undo):
+            await workflow.execute_activity(step, order, task_queue=queue, **OPTS)
         self.step = "cancelled"
         return OrderOutput(f"cancelled: {reason}", "", self.address)
 

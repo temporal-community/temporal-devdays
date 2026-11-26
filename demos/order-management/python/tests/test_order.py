@@ -45,6 +45,7 @@ async def test_happy_path_ships_every_item_with_a_child_workflow(env):
         "ship:keypad", "ship:table legs", "ship:table top"]
     child = env.client.get_workflow_handle("ship-1")
     assert (await child.describe()).status.name == "COMPLETED"
+    assert "refund_charge" not in activities.calls and "release_stock" not in activities.calls
 
 
 async def test_flaky_card_succeeds_on_the_third_attempt(env):
@@ -58,7 +59,20 @@ async def test_bad_card_fails_fast_and_releases_the_stock(env):
     assert result.status == "cancelled: card declined"
     assert activities.calls.count("charge") == 1
     assert "release_stock" in activities.calls
+    assert "refund_charge" not in activities.calls, "a declined card moved no money"
     assert not any(c.startswith("ship:") for c in activities.calls)
+
+
+async def test_shipping_failure_refunds_the_card_then_releases_the_stock(env):
+    result = await (await start(env, "ship_fails")).result()
+    assert result.status == "cancelled: shipping failed"
+    calls = activities.calls
+    assert calls.count("charge") == 1
+    assert calls.count("refund_charge") == 1 and calls.count("release_stock") == 1
+    assert calls.index("refund_charge") < calls.index("release_stock"), "undo steps run in reverse order"
+    assert calls.index("charge") < calls.index("refund_charge")
+    child = env.client.get_workflow_handle("ship-1")
+    assert (await child.describe()).status.name == "FAILED"
 
 
 async def test_approval_waits_for_the_signal(env):
@@ -73,6 +87,7 @@ async def test_unapproved_order_is_cancelled_after_an_hour(env):
     result = await (await start(env, "approval")).result()
     assert result.status == "cancelled: approval timed out"
     assert "release_stock" in activities.calls
+    assert "charge" not in activities.calls and "refund_charge" not in activities.calls
 
 
 async def test_update_changes_the_shipping_address(env):

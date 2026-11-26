@@ -16,4 +16,9 @@ public class PaymentActivitiesImpl implements PaymentActivities {
             throw new RuntimeException("payment API unavailable");
         }
     }
+
+    @Override
+    public void refundCharge(OrderInput order) {
+        Calls.all.add("refund_charge");
+    }
 }

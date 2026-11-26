@@ -17,9 +17,9 @@ public class ShipmentWorkflowImpl implements ShipmentWorkflow {
             .build());
 
     @Override
-    public String run(String orderId, String address, List<String> items) {
+    public String run(String orderId, String address, List<String> items, String scenario) {
         List<Promise<Void>> shipments = items.stream()
-            .map(item -> Async.procedure(shipping::shipItem, orderId, item))
+            .map(item -> Async.procedure(shipping::shipItem, orderId, item, scenario))
             .toList();
         Promise.allOf(shipments).get();
         return "TRK-" + orderId;

@@ -35,6 +35,7 @@
   legend { font-weight: 600; margin-bottom: .5rem; padding: 0; }
   .choices { display: grid; gap: .5rem; grid-template-columns: 1fr 1fr; }
   .choice { position: relative; }
+  .choice:last-child:nth-child(odd) { grid-column: 1 / -1; }
   .choice input { position: absolute; opacity: 0; inset: 0; cursor: pointer; margin: 0; }
   .choice span { display: block; height: 100%; padding: .6rem .7rem; border: 1px solid var(--border); border-radius: 10px; }
   .choice b { display: block; }
@@ -123,6 +124,8 @@
           <span><b>Bad card</b><small>Fails at once, stock is released.</small></span></label>
         <label class="choice"><input type="radio" name="scenario" value="approval">
           <span><b>Needs approval</b><small>Waits for you: Signal and Update.</small></span></label>
+        <label class="choice"><input type="radio" name="scenario" value="ship_fails">
+          <span><b>Shipping fails</b><small>Card is charged, then undone: refund, release stock.</small></span></label>
       </div>
     </fieldset>
     <label class="field gap" for="address">Shipping address</label>
@@ -183,7 +186,8 @@ function render(s) {
   const cancelled = s.step === "cancelled" || s.step === "cancelling";
   const finished = s.step === "done";
   if (cancelled) {
-    const failKey = (s.result || "").includes("approval") ? "waiting for approval" : "charging card";
+    const why = s.result || "";
+    const failKey = why.includes("approval") ? "waiting for approval" : why.includes("shipping") ? "shipping" : "charging card";
     lastIdx = list.findIndex(([key]) => key === failKey);
   }
   $("steps").innerHTML = list.map(([key, label], i) => {

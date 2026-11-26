@@ -6,12 +6,12 @@ import demo.Models.OrderStatus;
 import io.temporal.activity.ActivityOptions;
 import io.temporal.common.RetryOptions;
 import io.temporal.failure.ActivityFailure;
+import io.temporal.failure.ChildWorkflowFailure;
 import io.temporal.workflow.ChildWorkflowOptions;
 import io.temporal.workflow.Workflow;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 public class OrderWorkflowImpl implements OrderWorkflow {
     private final InventoryActivities inventory = Workflow.newActivityStub(InventoryActivities.class,
@@ -38,7 +38,7 @@ public class OrderWorkflowImpl implements OrderWorkflow {
         List<String> items = inventory.checkStock(order);
 
         step = "reserving stock";
-        List<Consumer<OrderInput>> undo = new ArrayList<>(List.of(inventory::releaseStock));  // registered before the step
+        List<Runnable> undo = new ArrayList<>(List.of(() -> inventory.releaseStock(order)));  // registered before the step
         inventory.reserveStock(order);
 
         if (order.scenario().equals("approval")) {
@@ -54,19 +54,25 @@ public class OrderWorkflowImpl implements OrderWorkflow {
         } catch (ActivityFailure e) {
             return cancel(order, undo, "card declined");
         }
+        undo.add(() -> payments.refundCharge(order));  // a declined card moved no money, so this is added after the charge
 
         step = "shipping";
         ShipmentWorkflow shipment = Workflow.newChildWorkflowStub(ShipmentWorkflow.class,
             ChildWorkflowOptions.newBuilder().setWorkflowId("ship-" + order.orderId()).build());
-        String trackingId = shipment.run(order.orderId(), address, items);
+        String trackingId;
+        try {
+            trackingId = shipment.run(order.orderId(), address, items, order.scenario());
+        } catch (ChildWorkflowFailure e) {
+            return cancel(order, undo, "shipping failed");
+        }
         step = "done";
         return new OrderOutput("shipped", trackingId, address);
     }
 
-    private OrderOutput cancel(OrderInput order, List<Consumer<OrderInput>> undo, String reason) {
+    private OrderOutput cancel(OrderInput order, List<Runnable> undo, String reason) {
         step = "cancelling";
         for (int i = undo.size() - 1; i >= 0; i--) {
-            undo.get(i).accept(order);
+            undo.get(i).run();
         }
         step = "cancelled";
         return new OrderOutput("cancelled: " + reason, "", address);

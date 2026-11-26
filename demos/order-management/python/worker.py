@@ -4,7 +4,7 @@ import sys
 from temporalio.client import Client
 from temporalio.worker import Worker
 
-from activities import charge, check_stock, release_stock, reserve_stock, ship_item
+from activities import charge, check_stock, refund_charge, release_stock, reserve_stock, ship_item
 from workflows import OrderWorkflow, ShipmentWorkflow
 
 TASK_QUEUE = "orders"
@@ -12,7 +12,7 @@ TASK_QUEUE = "orders"
 SERVICES = {
     "orders": dict(workflows=[OrderWorkflow, ShipmentWorkflow]),
     "inventory": dict(activities=[check_stock, reserve_stock, release_stock]),
-    "payments": dict(activities=[charge]),
+    "payments": dict(activities=[charge, refund_charge]),
     "shipping": dict(activities=[ship_item]),
 }
 

@@ -32,5 +32,13 @@ async def charge(order: OrderInput) -> None:
 
 
 @activity.defn
-async def ship_item(order_id: str, item: str) -> None:
+async def refund_charge(order: OrderInput) -> None:
+    calls.append("refund_charge")
+
+
+@activity.defn
+async def ship_item(order_id: str, item: str, scenario: str) -> None:
+    if scenario == "ship_fails" and item == "keypad":
+        calls.append(f"ship_failed:{item}")
+        raise ApplicationError("no courier available", non_retryable=True)
     calls.append(f"ship:{item}")

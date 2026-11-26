@@ -5,7 +5,7 @@ from dataclasses import dataclass
 class OrderInput:
     order_id: str
     address: str
-    scenario: str = "happy"  # happy | approval | bad_card | flaky_card
+    scenario: str = "happy"  # happy | approval | bad_card | flaky_card | ship_fails
 
 
 @dataclass

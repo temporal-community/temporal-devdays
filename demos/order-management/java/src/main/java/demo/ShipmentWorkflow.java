@@ -7,5 +7,5 @@ import java.util.List;
 @WorkflowInterface
 public interface ShipmentWorkflow {
     @WorkflowMethod(name = "ShipmentWorkflow")
-    String run(String orderId, String address, List<String> items);
+    String run(String orderId, String address, List<String> items, String scenario);
 }

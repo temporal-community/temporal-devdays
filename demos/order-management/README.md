@@ -13,7 +13,7 @@ flowchart LR
     UI["Web app :5050"] -->|start, Signal, Update, Query| T[("Temporal")]
     T <-->|orders queue| O["orders service<br/>OrderWorkflow, ShipmentWorkflow"]
     T <-->|inventory queue| I["inventory service<br/>check_stock, reserve_stock, release_stock"]
-    T <-->|payments queue| P["payments service<br/>charge"]
+    T <-->|payments queue| P["payments service<br/>charge, refund_charge"]
     T <-->|shipping queue| S["shipping service<br/>ship_item"]
 ```
 
@@ -21,7 +21,7 @@ flowchart LR
 |---|---|---|---|---|
 | orders | `orders` | `OrderWorkflow`, `ShipmentWorkflow` | 2 Workflows, no Activities | the web app |
 | inventory | `inventory` | `check_stock`, `reserve_stock`, `release_stock` | 3 Activities | `OrderWorkflow` |
-| payments | `payments` | `charge` | 1 Activity | `OrderWorkflow` |
+| payments | `payments` | `charge`, `refund_charge` | 2 Activities | `OrderWorkflow` |
 | shipping | `shipping` | `ship_item` | 1 Activity | `ShipmentWorkflow`, once per item in parallel |
 
 A service is a Worker listening on one task queue. It holds Activities (or, for `orders`, Workflows). A service is not itself an Activity.
@@ -40,7 +40,7 @@ A service is a Worker listening on one task queue. It holds Activities (or, for 
 | Update | a message that changes a running Workflow and returns an answer, and can be rejected | `change_address` |
 | Query | a read-only question to a running Workflow | `status` |
 | Retry Policy | how Temporal retries a failed Activity | `charge` fails twice, then passes |
-| Saga | undoing earlier steps when a later step fails | `release_stock` after a declined card |
+| Saga | undoing earlier steps, in reverse order, when a later step fails | `refund_charge` then `release_stock` after shipping fails |
 
 ### One order, step by step
 
@@ -55,13 +55,15 @@ A service is a Worker listening on one task queue. It holds Activities (or, for 
 | 7 | ship the 3 items at the same time | shipping | `shipping` | 3 Activities |
 | 8 | the order is done | `orders` | none | Workflow returns |
 
-If step 5 fails for good, step 3 is undone with `release_stock` and steps 6 and 7 never run, so no `ship-<id>` appears.
+If step 5 fails for good (a declined card), step 3 is undone with `release_stock` and steps 6 and 7 never run, so no `ship-<id>` appears.
+
+If step 7 fails (**Shipping fails**), the child Workflow fails and the order undoes its steps in reverse: `refund_charge` on `payments`, then `release_stock` on `inventory`. Here `ship-<id>` exists and shows as failed.
 
 What this shows about microservices:
 - **Services never call each other.** The Workflow calls each one by its task queue, so there is no service-to-service HTTP, no queue wiring and no retry code in the services.
 - **A service can be down without losing the order.** Stop `payments` and an order waits at "charging card". Start it again and the order carries on. Try it below.
 - **Each service can use a different language.** The queue and Activity names are the contract. Python and Java services work together.
-- **Undo is the Workflow's job.** If the card is declined, the Workflow tells `inventory` to release the stock (Saga, as in exercise 10).
+- **Undo is the Workflow's job.** If something fails, the Workflow tells the earlier services to undo their work, in reverse order (Saga, as in exercise 10). Try **Shipping fails**: the card is refunded, then the stock is released.
 
 ## Run it
 
@@ -117,10 +119,11 @@ mvn -q compile exec:java@worker -Dexec.args="payments"    # terminal 6
 | Flaky card | the charge fails twice, the Retry Policy makes attempt 3 pass | Temporal retries for you, no retry loop in your code | the `charge` Activity shows 3 attempts |
 | Bad card | non-retryable error, the reserved stock is released, order cancelled | some errors must not be retried, so earlier steps are undone (Saga) | `release_stock` runs after `charge` fails |
 | Needs approval | the Workflow waits for a Signal, an Update can change the address first | a Workflow can wait for a person without using a thread | click Approve, or Change address (a short address is rejected) |
+| Shipping fails | the card is charged, then one item cannot ship, so the child Workflow fails | a full Saga: undo in reverse order, `refund_charge` then `release_stock` | the order's history, and `ship-<id>` showing Failed |
 
 ## Test
 
-No server needed. Both run the same seven scenarios, and the Java project also tests its web app.
+No server needed. Both run the same eight scenario tests (one per scenario, plus the approval timeout, the address Update and a rejected address), and the Java project also has three web app tests.
 
 ```bash
 cd demos/order-management/python && uv run pytest -q

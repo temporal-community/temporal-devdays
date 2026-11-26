@@ -62,6 +62,7 @@ class OrderTest {
         assertEquals("shipped", out.status());
         assertEquals("TRK-1", out.trackingId());
         assertEquals(3, Calls.all.stream().filter(c -> c.startsWith("ship:")).count());
+        assertEquals(0, count("refund_charge") + count("release_stock"));
     }
 
     @Test
@@ -76,7 +77,21 @@ class OrderTest {
         assertEquals("cancelled: card declined", out.status());
         assertEquals(1, count("charge"));
         assertEquals(1, count("release_stock"));
+        assertEquals(0, count("refund_charge"), "a declined card moved no money");
         assertTrue(Calls.all.stream().noneMatch(c -> c.startsWith("ship:")));
+    }
+
+    @Test
+    void shippingFailureRefundsTheCardThenReleasesTheStock() {
+        OrderOutput out = result(start("ship_fails"));
+        assertEquals("cancelled: shipping failed", out.status());
+        assertEquals(1, count("charge"));
+        assertEquals(1, count("refund_charge"));
+        assertEquals(1, count("release_stock"));
+        assertTrue(Calls.all.indexOf("refund_charge") < Calls.all.indexOf("release_stock"), "undo steps run in reverse order");
+        assertTrue(Calls.all.indexOf("charge") < Calls.all.indexOf("refund_charge"));
+        assertEquals("FAILED", env.getWorkflowClient().newUntypedWorkflowStub("ship-1")
+            .describe().getStatus().name().replace("WORKFLOW_EXECUTION_STATUS_", ""));
     }
 
     @Test
@@ -93,6 +108,7 @@ class OrderTest {
         OrderOutput out = result(start("approval"));
         assertEquals("cancelled: approval timed out", out.status());
         assertEquals(1, count("release_stock"));
+        assertEquals(0, count("charge") + count("refund_charge"));
     }
 
     @Test
