@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Order management demo</title>
+<style>
+  :root {
+    --bg: #f8fafc; --card: #fff; --fg: #0f172a; --muted: #475569; --border: #cbd5e1;
+    --accent: #15803d; --on-accent: #fff; --danger: #b91c1c; --warn: #b45309; --ring: #1d4ed8;
+    --font: system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f172a; --card: #1b2336; --fg: #f8fafc; --muted: #a3b1c6; --border: #475569;
+      --accent: #22c55e; --on-accent: #0f172a; --danger: #f87171; --warn: #fbbf24; --ring: #93c5fd;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body { background: var(--bg); color: var(--fg); font: 15px/1.45 var(--font); display: flex; flex-direction: column; }
+
+  header { flex: none; display: flex; justify-content: space-between; align-items: baseline; gap: 1rem;
+    padding: .75rem 1rem; border-bottom: 1px solid var(--border); }
+  h1 { font-size: 1.15rem; margin: 0; }
+  h2 { font-size: .8rem; margin: 0 0 .75rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  a { color: var(--ring); }
+
+  main { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    gap: 1rem; padding: 1rem; max-width: 70rem; width: 100%; margin: 0 auto; }
+  .card { min-height: 0; overflow: auto; display: flex; flex-direction: column;
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; }
+
+  fieldset { border: 0; padding: 0; margin: 0; }
+  legend { font-weight: 600; margin-bottom: .5rem; padding: 0; }
+  .choices { display: grid; gap: .5rem; grid-template-columns: 1fr 1fr; }
+  .choice { position: relative; }
+  .choice input { position: absolute; opacity: 0; inset: 0; cursor: pointer; margin: 0; }
+  .choice span { display: block; height: 100%; padding: .6rem .7rem; border: 1px solid var(--border); border-radius: 10px; }
+  .choice b { display: block; }
+  .choice small { color: var(--muted); display: block; line-height: 1.3; }
+  .choice input:checked + span { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+  .choice input:focus-visible + span { outline: 3px solid var(--ring); outline-offset: 2px; }
+
+  label.field { display: block; font-weight: 600; }
+  input[type=text] { width: 100%; min-height: 44px; margin-top: .25rem; padding: .5rem .75rem; font: inherit;
+    color: var(--fg); background: var(--bg); border: 1px solid var(--border); border-radius: 8px; }
+  button { min-height: 44px; padding: .5rem 1rem; font: inherit; font-weight: 600; cursor: pointer;
+    color: var(--fg); background: transparent; border: 1px solid var(--border); border-radius: 8px;
+    transition: background-color .15s, border-color .15s; }
+  button:hover:not(:disabled) { border-color: var(--fg); }
+  button.primary { color: var(--on-accent); background: var(--accent); border-color: var(--accent); width: 100%; }
+  button:disabled, input:disabled { opacity: .5; cursor: not-allowed; }
+  :focus-visible { outline: 3px solid var(--ring); outline-offset: 2px; }
+  .gap { margin-top: .75rem; }
+  .push { margin-top: auto; padding-top: .75rem; }
+
+  .empty { margin: auto; text-align: center; color: var(--muted); max-width: 18rem; }
+  .meta { display: flex; justify-content: space-between; align-items: center; gap: .5rem; flex-wrap: wrap; color: var(--muted); }
+  .meta code { font-family: var(--mono); color: var(--fg); }
+  .badge { font-family: var(--mono); font-size: .8rem; padding: .1rem .5rem; border: 1px solid var(--border); border-radius: 999px; }
+
+  ol.steps { list-style: none; margin: 1rem 0; padding: 0; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; }
+  ol.steps li { position: relative; display: flex; flex-direction: column; align-items: center; gap: .35rem;
+    text-align: center; font-size: .8rem; line-height: 1.25; color: var(--muted); padding: 0 .15rem; }
+  ol.steps li + li::before { content: ""; position: absolute; top: .75rem; right: 50%; width: 100%; height: 2px; background: var(--border); z-index: 0; }
+  ol.steps li.done::before, ol.steps li.current::before, ol.steps li.waiting::before, ol.steps li.failed::before { background: var(--accent); }
+  .dot { position: relative; z-index: 1; width: 1.5rem; height: 1.5rem; border-radius: 50%; border: 2px solid var(--border);
+    background: var(--card); display: grid; place-items: center; }
+  .dot svg { width: .9rem; height: .9rem; display: none; }
+  li.done { color: var(--fg); }
+  li.done .dot { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  li.done .ok { display: block; }
+  li.current { color: var(--fg); font-weight: 600; }
+  li.current .dot { border-color: var(--accent); animation: pulse 1.4s ease-in-out infinite; }
+  li.failed { color: var(--danger); font-weight: 600; }
+  li.failed::before { background: var(--danger) !important; }
+  li.failed .dot { border-color: var(--danger); color: var(--danger); }
+  li.failed .bad { display: block; }
+  li.waiting { color: var(--warn); font-weight: 600; }
+  li.waiting .dot { border-color: var(--warn); animation: pulse 1.4s ease-in-out infinite; }
+  @keyframes pulse { 50% { box-shadow: 0 0 0 5px transparent; } 0%, 100% { box-shadow: 0 0 0 0 var(--accent); } }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+  .banner { padding: .5rem .75rem; border-radius: 8px; border: 1px solid var(--border); margin: 0; }
+  .banner.good { border-color: var(--accent); }
+  .banner.bad { border-color: var(--danger); }
+  .actions { display: grid; gap: .5rem; }
+  .addr { display: grid; grid-template-columns: 1fr auto; gap: .5rem; }
+  .msg { min-height: 1.4rem; margin: .4rem 0 0; color: var(--muted); }
+  [hidden] { display: none !important; }
+
+  @media (max-width: 760px) {
+    main { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); gap: .5rem; padding: .5rem; }
+    header { padding: .5rem .75rem; }
+    .choice small { display: none; }
+    .choice span { padding: .5rem .6rem; }
+    .card { padding: .75rem; }
+    h2 { margin-bottom: .4rem; }
+    legend { position: absolute; left: -9999px; }
+    .meta + ol.steps { margin: .6rem 0; }
+    .msg { min-height: 1.2rem; }
+    ol.steps li { font-size: .7rem; }
+  }
+</style>
+
+<header>
+  <h1>Order management</h1>
+  <a href="http://localhost:8233" target="_blank" rel="noopener">Temporal Web UI</a>
+</header>
+
+<main>
+  <section class="card" aria-labelledby="new">
+    <h2 id="new">Place an order</h2>
+    <fieldset>
+      <legend>Scenario</legend>
+      <div class="choices">
+        <label class="choice"><input type="radio" name="scenario" value="happy" checked>
+          <span><b>Happy path</b><small>Everything works. A child Workflow ships.</small></span></label>
+        <label class="choice"><input type="radio" name="scenario" value="flaky_card">
+          <span><b>Flaky card</b><small>Charge fails twice, a retry succeeds.</small></span></label>
+        <label class="choice"><input type="radio" name="scenario" value="bad_card">
+          <span><b>Bad card</b><small>Fails at once, stock is released.</small></span></label>
+        <label class="choice"><input type="radio" name="scenario" value="approval">
+          <span><b>Needs approval</b><small>Waits for you: Signal and Update.</small></span></label>
+      </div>
+    </fieldset>
+    <label class="field gap" for="address">Shipping address</label>
+    <input type="text" id="address" value="1 Main St, Redwood" autocomplete="off">
+    <div class="push"><button class="primary" id="place" onclick="start()">Place order</button></div>
+  </section>
+
+  <section class="card" aria-labelledby="track">
+    <h2 id="track">Live order</h2>
+    <p class="empty" id="empty">Place an order and its steps appear here, step by step.</p>
+
+    <div id="run" hidden style="display:flex;flex-direction:column;flex:1;min-height:0">
+      <div class="meta">
+        <span>Order <code id="oid"></code> <span class="badge" id="state"></span></span>
+        <a id="webui" href="#" target="_blank" rel="noopener">Open in Web UI</a>
+      </div>
+      <ol class="steps" id="steps" aria-label="Order steps"></ol>
+      <p class="banner" id="result" role="status" hidden></p>
+      <p class="meta" style="justify-content:flex-start">Ship to&nbsp;<code id="ship"></code></p>
+
+      <div class="push">
+        <h2>Talk to the running Workflow</h2>
+        <div class="actions">
+          <button id="approve" onclick="approve()">Approve (Signal)</button>
+          <label class="field" for="newaddr" style="margin-bottom:-.25rem">New address (Update)</label>
+          <div class="addr">
+            <input type="text" id="newaddr" autocomplete="off" aria-describedby="msg" style="margin-top:0">
+            <button id="change" onclick="changeAddress()">Change</button>
+          </div>
+        </div>
+        <p class="msg" id="msg" role="status"></p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-ok" viewBox="0 0 16 16"><path d="M3 8.5l3.2 3L13 4.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-bad" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+</svg>
+
+<script>
+const STEPS = [
+  ["checking stock", "Check stock"],
+  ["reserving stock", "Reserve stock"],
+  ["waiting for approval", "Approval"],
+  ["charging card", "Charge card"],
+  ["shipping", "Ship (child)"],
+];
+let id = null, timer = null, lastIdx = 0, needsApproval = false;
+const $ = (x) => document.getElementById(x);
+const post = (url, body) => fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body || {}) });
+
+function render(s) {
+  const list = STEPS.filter(([key]) => needsApproval || key !== "waiting for approval");
+  const idx = list.findIndex(([key]) => key === s.step);
+  if (idx >= 0) lastIdx = idx;
+  const cancelled = s.step === "cancelled" || s.step === "cancelling";
+  const finished = s.step === "done";
+  if (cancelled) {
+    const failKey = (s.result || "").includes("approval") ? "waiting for approval" : "charging card";
+    lastIdx = list.findIndex(([key]) => key === failKey);
+  }
+  $("steps").innerHTML = list.map(([key, label], i) => {
+    let cls = "";
+    if (finished || i < lastIdx) cls = "done";
+    else if (cancelled && i === lastIdx) cls = "failed";
+    else if (i === lastIdx) cls = key === "waiting for approval" ? "waiting" : "current";
+    const aria = cls === "current" || cls === "waiting" ? ' aria-current="step"' : "";
+    return `<li class="${cls}"${aria}><span class="dot"><svg class="ok"><use href="#i-ok"/></svg><svg class="bad"><use href="#i-bad"/></svg></span>${label}</li>`;
+  }).join("");
+  $("state").textContent = s.state.toLowerCase();
+  $("ship").textContent = s.address;
+  const running = s.state === "RUNNING";
+  $("approve").disabled = !(running && s.step === "waiting for approval");
+  $("change").disabled = !running;
+  $("newaddr").disabled = !running;
+  const r = $("result");
+  if (s.result) {
+    const ok = s.result === "shipped";
+    r.hidden = false; r.className = "banner " + (ok ? "good" : "bad");
+    r.textContent = ok ? "Shipped. The order is complete." : "Order " + s.result + ".";
+  }
+}
+
+async function poll() {
+  const r = await fetch("/status/" + id);
+  if (!r.ok) return;
+  const s = await r.json();
+  render(s);
+  if (s.state !== "RUNNING") clearInterval(timer);
+}
+
+async function start() {
+  $("place").disabled = true;
+  const scenario = document.querySelector("[name=scenario]:checked").value;
+  const r = await post("/start", { scenario, address: $("address").value });
+  id = (await r.json()).order_id; lastIdx = 0; needsApproval = scenario === "approval";
+  $("place").disabled = false;
+  $("oid").textContent = id;
+  $("webui").href = "http://localhost:8233/namespaces/default/workflows/order-" + id;
+  $("result").hidden = true; $("msg").textContent = ""; $("newaddr").value = "";
+  $("empty").hidden = true; $("run").hidden = false;
+  clearInterval(timer); timer = setInterval(poll, 700); poll();
+}
+
+async function approve() {
+  await post("/approve/" + id);
+  $("msg").textContent = "Signal sent: approved.";
+  poll();
+}
+
+async function changeAddress() {
+  const r = await post("/address/" + id, { address: $("newaddr").value });
+  $("msg").textContent = (await r.json()).message;
+  poll();
+}
+</script>

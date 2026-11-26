@@ -39,11 +39,12 @@ You need the [Temporal CLI](https://docs.temporal.io/cli), and either Python 3.1
 temporal server start-dev              # Web UI at http://localhost:8233
 ```
 
-**Terminal 2: the web app**
+**Terminal 2: the web app.** Pick one. They serve the same page on port 5050.
 ```bash
-cd demos/order-management/python
-uv run python app.py                   # open http://localhost:5050
+cd demos/order-management/python && uv run python app.py     # Python
+cd demos/order-management/java && mvn -q compile exec:java@app   # Java
 ```
+Open http://localhost:5050. The web app is only a Temporal client, so it works with Workers in either language.
 
 **Terminal 3: the services.** Pick one.
 
@@ -86,7 +87,7 @@ mvn -q compile exec:java@worker -Dexec.args="payments"    # terminal 6
 
 ## Test
 
-No server needed. Both run the same seven scenarios.
+No server needed. Both run the same seven scenarios, and the Java project also tests its web app.
 
 ```bash
 cd demos/order-management/python && uv run pytest -q
@@ -106,5 +107,5 @@ cd demos/order-management/java && mvn -q test
 - `python/activities.py`: the services' Activities, all simulated
 - `python/worker.py`: one Worker per service, `SERVICES` lists them
 - `python/app.py`, `python/templates/index.html`: the web app
-- `java/src/main/java/demo`: the same services in Java, one interface and class per service
+- `java/src/main/java/demo`: the same services and web app in Java, one interface and class per service
 - `python/tests`, `java/src/test`: one test per scenario

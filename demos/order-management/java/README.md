@@ -1,6 +1,6 @@
 # Order management: Java services
 
-The same four services as the [Python version](../python), written in Java 21. Read the [demo README](../README.md) first for the architecture and the web app. The web app is in `../python`.
+The same four services and the same web app as the [Python version](../python), written in Java 21. Read the [demo README](../README.md) first for the architecture. You need no Python here.
 
 ## Services
 
@@ -10,6 +10,7 @@ The same four services as the [Python version](../python), written in Java 21. R
 | inventory | `inventory` | `InventoryActivities` |
 | payments | `payments` | `PaymentActivities` |
 | shipping | `shipping` | `ShippingActivities` |
+| web app | none | `WebApp`: starts orders and sends the Signal, Update and Query, on port 5050 |
 
 Each Activity interface has an `Impl` class next to it. Names such as `check_stock`, `charge` and `change_address` are set explicitly, so the Java services work with the Python ones.
 
@@ -19,7 +20,7 @@ You need Java 21, Maven and the [Temporal CLI](https://docs.temporal.io/cli). Ru
 
 ```bash
 temporal server start-dev                                  # terminal 1
-cd ../python && uv run python app.py                       # terminal 2, open http://localhost:5050
+mvn -q compile exec:java@app                               # terminal 2, open http://localhost:5050
 ```
 
 Then the services, in the terminal you prefer:
@@ -49,14 +50,15 @@ No server needed.
 mvn -q test
 ```
 
-Seven tests, one per scenario: happy path, flaky card, bad card, approval Signal, approval timeout, address Update, and a rejected address.
+Ten tests. Seven cover the scenarios: happy path, flaky card, bad card, approval Signal, approval timeout, address Update and a rejected address. Three cover the web app: the page, a happy order and the approval flow.
 
 ## Where to look
 
+- `WebApp.java`: the web app, using only the JDK's HTTP server. `src/main/resources/index.html` is a copy of the Python app's page, and a test fails if they differ
 - `WorkerApp.java`: which queue gets which service, and the `main` that starts them
 - `OrderWorkflowImpl.java`: the order steps, Saga undo, Signal, Update and Query
 - `ShipmentWorkflowImpl.java`: ships every item in parallel
 - `Models.java`: the inputs and outputs, with the JSON field names the Python app uses
 - `OrderTest.java`: the tests
 
-If you change the code, stop and restart the Worker.
+If you change the code, stop and restart the Worker. If you change the page, change `python/templates/index.html` and copy it to `src/main/resources/index.html`.

@@ -56,6 +56,10 @@
             <id>worker</id>
             <configuration><mainClass>${worker.main}</mainClass></configuration>
           </execution>
+          <execution>
+            <id>app</id>
+            <configuration><mainClass>demo.WebApp</mainClass></configuration>
+          </execution>
         </executions>
       </plugin>
     </plugins>
