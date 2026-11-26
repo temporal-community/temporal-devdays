@@ -9,7 +9,6 @@ import io.temporal.client.WorkflowOptions;
 import io.temporal.client.WorkflowStub;
 import io.temporal.client.WorkflowUpdateException;
 import io.temporal.testing.TestWorkflowEnvironment;
-import io.temporal.worker.Worker;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,10 +20,9 @@ class OrderTest {
 
     @BeforeEach
     void setUp() {
-        ActivitiesImpl.calls.clear();
+        Calls.all.clear();
         env = TestWorkflowEnvironment.newInstance();
-        Worker worker = env.newWorker(WorkerApp.TASK_QUEUE);
-        WorkerApp.register(worker);
+        WorkerApp.register(env::newWorker, WorkerApp.SERVICES);
         env.start();
         client = env.getWorkflowClient();
     }
@@ -55,7 +53,7 @@ class OrderTest {
     }
 
     long count(String call) {
-        return ActivitiesImpl.calls.stream().filter(call::equals).count();
+        return Calls.all.stream().filter(call::equals).count();
     }
 
     @Test
@@ -63,7 +61,7 @@ class OrderTest {
         OrderOutput out = result(start("happy"));
         assertEquals("shipped", out.status());
         assertEquals("TRK-1", out.trackingId());
-        assertEquals(3, ActivitiesImpl.calls.stream().filter(c -> c.startsWith("ship:")).count());
+        assertEquals(3, Calls.all.stream().filter(c -> c.startsWith("ship:")).count());
     }
 
     @Test
@@ -78,7 +76,7 @@ class OrderTest {
         assertEquals("cancelled: card declined", out.status());
         assertEquals(1, count("charge"));
         assertEquals(1, count("release_stock"));
-        assertTrue(ActivitiesImpl.calls.stream().noneMatch(c -> c.startsWith("ship:")));
+        assertTrue(Calls.all.stream().noneMatch(c -> c.startsWith("ship:")));
     }
 
     @Test

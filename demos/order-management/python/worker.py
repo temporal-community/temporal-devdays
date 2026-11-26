@@ -1,4 +1,5 @@
 import asyncio
+import sys
 
 from temporalio.client import Client
 from temporalio.worker import Worker
@@ -8,20 +9,22 @@ from workflows import OrderWorkflow, ShipmentWorkflow
 
 TASK_QUEUE = "orders"
 
-
-def make_worker(client: Client) -> Worker:
-    return Worker(
-        client,
-        task_queue=TASK_QUEUE,
-        workflows=[OrderWorkflow, ShipmentWorkflow],
-        activities=[check_stock, reserve_stock, release_stock, charge, ship_item],
-    )
+SERVICES = {
+    "orders": dict(workflows=[OrderWorkflow, ShipmentWorkflow]),
+    "inventory": dict(activities=[check_stock, reserve_stock, release_stock]),
+    "payments": dict(activities=[charge]),
+    "shipping": dict(activities=[ship_item]),
+}
 
 
-async def main():
+def make_workers(client: Client, names: list[str] | None = None) -> list[Worker]:
+    return [Worker(client, task_queue=n, **SERVICES[n]) for n in (names or SERVICES)]
+
+
+async def main(names: list[str]):
     client = await Client.connect("localhost:7233")
-    await make_worker(client).run()
+    await asyncio.gather(*[w.run() for w in make_workers(client, names)])
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    asyncio.run(main(sys.argv[1:]))

@@ -1,11 +1,12 @@
 import asyncio
+from contextlib import AsyncExitStack
 
 import activities
 import pytest
 from models import OrderInput
 from temporalio.client import WorkflowUpdateFailedError
 from temporalio.testing import WorkflowEnvironment
-from worker import TASK_QUEUE, make_worker
+from worker import TASK_QUEUE, make_workers
 from workflows import OrderWorkflow
 
 
@@ -13,7 +14,9 @@ from workflows import OrderWorkflow
 async def env():
     activities.calls.clear()
     async with await WorkflowEnvironment.start_time_skipping() as env:
-        async with make_worker(env.client):
+        async with AsyncExitStack() as stack:
+            for worker in make_workers(env.client):
+                await stack.enter_async_context(worker)
             yield env
 
 

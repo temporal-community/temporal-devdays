@@ -9,18 +9,19 @@ import java.time.Duration;
 import java.util.List;
 
 public class ShipmentWorkflowImpl implements ShipmentWorkflow {
-    private final Activities activities = Workflow.newActivityStub(Activities.class,
+    private final ShippingActivities shipping = Workflow.newActivityStub(ShippingActivities.class,
         ActivityOptions.newBuilder()
+            .setTaskQueue("shipping")
             .setStartToCloseTimeout(Duration.ofSeconds(5))
             .setRetryOptions(RetryOptions.newBuilder().setInitialInterval(Duration.ofSeconds(1)).setMaximumAttempts(5).build())
             .build());
 
     @Override
     public String run(String orderId, String address, List<String> items) {
-        List<Promise<Void>> shipping = items.stream()
-            .map(item -> Async.procedure(activities::shipItem, orderId, item))
+        List<Promise<Void>> shipments = items.stream()
+            .map(item -> Async.procedure(shipping::shipItem, orderId, item))
             .toList();
-        Promise.allOf(shipping).get();
+        Promise.allOf(shipments).get();
         return "TRK-" + orderId;
     }
 }

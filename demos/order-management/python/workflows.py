@@ -20,7 +20,7 @@ class ShipmentWorkflow:
     @workflow.run
     async def run(self, order_id: str, address: str, items: list[str]) -> str:
         await asyncio.gather(*[
-            workflow.execute_activity(ship_item, args=[order_id, item], **OPTS)
+            workflow.execute_activity(ship_item, args=[order_id, item], task_queue="shipping", **OPTS)
             for item in items
         ])
         return f"TRK-{order_id}"
@@ -37,11 +37,11 @@ class OrderWorkflow:
     async def run(self, order: OrderInput) -> OrderOutput:
         self.address = order.address
         self.step = "checking stock"
-        items = await workflow.execute_activity(check_stock, order, **OPTS)
+        items = await workflow.execute_activity(check_stock, order, task_queue="inventory", **OPTS)
 
         self.step = "reserving stock"
         undo = [release_stock]  # registered before the step, as in exercise 10
-        await workflow.execute_activity(reserve_stock, order, **OPTS)
+        await workflow.execute_activity(reserve_stock, order, task_queue="inventory", **OPTS)
 
         if order.scenario == "approval":
             self.step = "waiting for approval"
@@ -52,7 +52,7 @@ class OrderWorkflow:
 
         self.step = "charging card"
         try:
-            await workflow.execute_activity(charge, order, **OPTS)
+            await workflow.execute_activity(charge, order, task_queue="payments", **OPTS)
         except ActivityError:
             return await self.cancel(order, undo, "card declined")
 
@@ -68,7 +68,7 @@ class OrderWorkflow:
     async def cancel(self, order: OrderInput, undo: list, reason: str) -> OrderOutput:
         self.step = "cancelling"
         for step in reversed(undo):
-            await workflow.execute_activity(step, order, **OPTS)
+            await workflow.execute_activity(step, order, task_queue="inventory", **OPTS)
         self.step = "cancelled"
         return OrderOutput(f"cancelled: {reason}", "", self.address)
 

@@ -14,8 +14,15 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class OrderWorkflowImpl implements OrderWorkflow {
-    private final Activities activities = Workflow.newActivityStub(Activities.class,
+    private final InventoryActivities inventory = Workflow.newActivityStub(InventoryActivities.class,
         ActivityOptions.newBuilder()
+            .setTaskQueue("inventory")
+            .setStartToCloseTimeout(Duration.ofSeconds(5))
+            .setRetryOptions(RetryOptions.newBuilder().setInitialInterval(Duration.ofSeconds(1)).setMaximumAttempts(5).build())
+            .build());
+    private final PaymentActivities payments = Workflow.newActivityStub(PaymentActivities.class,
+        ActivityOptions.newBuilder()
+            .setTaskQueue("payments")
             .setStartToCloseTimeout(Duration.ofSeconds(5))
             .setRetryOptions(RetryOptions.newBuilder().setInitialInterval(Duration.ofSeconds(1)).setMaximumAttempts(5).build())
             .build());
@@ -28,11 +35,11 @@ public class OrderWorkflowImpl implements OrderWorkflow {
     public OrderOutput run(OrderInput order) {
         address = order.address();
         step = "checking stock";
-        List<String> items = activities.checkStock(order);
+        List<String> items = inventory.checkStock(order);
 
         step = "reserving stock";
-        List<Consumer<OrderInput>> undo = new ArrayList<>(List.of(activities::releaseStock));  // registered before the step
-        activities.reserveStock(order);
+        List<Consumer<OrderInput>> undo = new ArrayList<>(List.of(inventory::releaseStock));  // registered before the step
+        inventory.reserveStock(order);
 
         if (order.scenario().equals("approval")) {
             step = "waiting for approval";
@@ -43,7 +50,7 @@ public class OrderWorkflowImpl implements OrderWorkflow {
 
         step = "charging card";
         try {
-            activities.charge(order);
+            payments.charge(order);
         } catch (ActivityFailure e) {
             return cancel(order, undo, "card declined");
         }

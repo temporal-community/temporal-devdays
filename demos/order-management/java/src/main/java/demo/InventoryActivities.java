@@ -6,7 +6,7 @@ import io.temporal.activity.ActivityMethod;
 import java.util.List;
 
 @ActivityInterface
-public interface Activities {
+public interface InventoryActivities {
     @ActivityMethod(name = "check_stock")
     List<String> checkStock(OrderInput order);
 
@@ -15,10 +15,4 @@ public interface Activities {
 
     @ActivityMethod(name = "release_stock")
     void releaseStock(OrderInput order);
-
-    @ActivityMethod(name = "charge")
-    void charge(OrderInput order);
-
-    @ActivityMethod(name = "ship_item")
-    void shipItem(String orderId, String item);
 }
