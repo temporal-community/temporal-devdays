@@ -46,6 +46,7 @@ A failing check at the start is expected. It tells you which TODO is next.
 | 14 | [Entity Workflow and Continue-As-New](concepts/14-entity-continue-as-new.md) | [exercise](python/14_entity_continue_as_new/exercise) · [solution](python/14_entity_continue_as_new/solution) | [exercise](java/14_entity_continue_as_new/exercise) · [solution](java/14_entity_continue_as_new/solution) |
 | 15 | [Safe deploys](concepts/15-safe-deploys.md) | [exercise](python/15_safe_deploys/exercise) · [solution](python/15_safe_deploys/solution) | [exercise](java/15_safe_deploys/exercise) · [solution](java/15_safe_deploys/solution) |
 | 16 | [An AI agent loop](concepts/16-ai-agent-loop.md) | [exercise](python/16_ai_agent_loop/exercise) · [solution](python/16_ai_agent_loop/solution) | [exercise](java/16_ai_agent_loop/exercise) · [solution](java/16_ai_agent_loop/solution) |
+| 17 | [Worker tuning and performance](concepts/17-worker-tuning.md) | [exercise](python/17_worker_tuning/exercise) · [solution](python/17_worker_tuning/solution) | [exercise](java/17_worker_tuning/exercise) · [solution](java/17_worker_tuning/solution) |
 
 ## Demos
 - [Order management](demos/order-management): a small web app with retries, a Saga, a child Workflow, a Signal and an Update.

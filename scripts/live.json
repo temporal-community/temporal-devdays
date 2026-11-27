@@ -205,5 +205,25 @@
     "expect": "It is sunny in Pune",
     "wait": 20,
     "cleanup": []
+  },
+  {
+    "dir": "python/17_worker_tuning/solution",
+    "workers": [
+      "../../.venv/bin/python worker.py"
+    ],
+    "starter": "../../.venv/bin/python starter.py",
+    "expect": "rendered 30 items",
+    "wait": 5,
+    "cleanup": []
+  },
+  {
+    "dir": "java/17_worker_tuning/solution",
+    "workers": [
+      "mvn -q compile exec:java@worker"
+    ],
+    "starter": "mvn -q compile exec:java@starter",
+    "expect": "rendered 30 items",
+    "wait": 20,
+    "cleanup": []
   }
 ]
