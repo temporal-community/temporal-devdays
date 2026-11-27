@@ -11,6 +11,7 @@ A learn-and-practice resource for Temporal. Each concept has a plain-words expla
 | Install Python deps | `make setup` |
 | Run every check (no server needed) | `make check` |
 | Run checks plus live smoke tests | `make check-live` (needs `temporal server start-dev`) |
+| Check that external links still work | `make check-links` (needs the network, runs nightly in CI) |
 | Dev server and Web UI | `temporal server start-dev` then http://localhost:8233 |
 | Python exercise | `cd python/NN_topic/exercise && uv run pytest` |
 | Java exercise | `cd java/NN_topic/exercise && mvn test` |

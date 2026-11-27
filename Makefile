@@ -1,4 +1,4 @@
-.PHONY: setup check check-live
+.PHONY: setup check check-live check-links
 
 setup:
 	cd python && uv sync
@@ -8,3 +8,6 @@ check:
 
 check-live:
 	./scripts/check.sh --live
+
+check-links:
+	python3 scripts/check_links.py
