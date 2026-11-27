@@ -8,8 +8,11 @@ TODO 1 starts all the Activities before waiting. TODO 2 moves shipping into a ch
 ## Why it works
 Starting every Activity before waiting lets them run together. A child Workflow gets its own ID and history.
 
-## Run
+## Run the tests
 ```bash
 cd python/13_fan_out_fan_in/solution
 uv run pytest
 ```
+No server needed.
+
+This topic is checked with tests only. There is no live run.

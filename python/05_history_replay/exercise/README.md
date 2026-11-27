@@ -19,6 +19,7 @@ The check fails until the TODOs are done.
 The history starts with `WORKFLOW_EXECUTION_STARTED` and contains a Timer, the same code replays, and the Workflow with the Timer moved (`swapped_workflow.py` / `SwappedPizzaWorkflowImpl.java`) fails to replay.
 
 ## Run it live
+Do this after the check passes. Start `temporal server start-dev` in terminal 1, then run these from `python/05_history_replay/exercise`:
 ```bash
 uv run python worker.py      # terminal 2
 uv run python starter.py     # terminal 3

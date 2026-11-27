@@ -20,6 +20,7 @@ The check fails until the TODOs are done.
 The Workflow returns `Hello, Temporal!`.
 
 ## Run it live
+Do this after the check passes. Start `temporal server start-dev` in terminal 1, then run these from `python/01_hello/exercise`:
 ```bash
 uv run python worker.py      # terminal 2
 uv run python starter.py     # terminal 3

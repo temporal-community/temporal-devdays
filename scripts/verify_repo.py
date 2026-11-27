@@ -49,6 +49,14 @@ def has_tests(d: Path, lang: str) -> bool:
     return any(d.glob("src/test/java/**/*Test.java"))
 
 
+def check_run_commands(d: Path, lang: str, rel: str, text: str) -> None:
+    if "no live run" in text.lower():
+        return
+    cmd = "exec:java@worker" if lang == "java" else "uv run python worker.py"
+    if cmd not in text:
+        fail(f"{rel}/README.md has no '{cmd}' command and does not say 'no live run'")
+
+
 def check_exercise_folders() -> None:
     for lang in LANGS:
         for name, topic in topics(lang).items():
@@ -70,6 +78,7 @@ def check_exercise_folders() -> None:
                     fail(f"{rel}/README.md does not link to concepts/{concepts[0].name}")
                 if not has_tests(d, lang):
                     fail(f"{rel} has no tests")
+                check_run_commands(d, lang, rel, text)
                 if role == "exercise":
                     sources = [p for p in d.rglob("*") if p.suffix in (".py", ".java") and not (set(p.relative_to(d).parts) & SKIP_DIRS)]
                     body = "\n".join(p.read_text() for p in sources)

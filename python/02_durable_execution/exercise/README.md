@@ -19,6 +19,7 @@ The check fails until the TODOs are done.
 The result is `baked ticket-Margherita` and the Event History contains a Timer.
 
 ## Run it live
+Do this after the check passes. Start `temporal server start-dev` in terminal 1, then run these from `python/02_durable_execution/exercise`:
 ```bash
 uv run python worker.py      # terminal 2
 uv run python starter.py     # terminal 3

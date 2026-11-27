@@ -9,6 +9,7 @@ def test_builds_the_schedule():
     assert schedule.action.id == "report"
     assert schedule.action.task_queue == "reports"
     assert schedule.spec.intervals[0].every == timedelta(minutes=1)
+    assert schedule.state.limited_actions and schedule.state.remaining_actions == 5
 
 
 async def test_creates_it_under_the_right_id():

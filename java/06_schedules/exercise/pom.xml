@@ -61,6 +61,10 @@
             <id>starter</id>
             <configuration><mainClass>${starter.main}</mainClass></configuration>
           </execution>
+          <execution>
+            <id>delete</id>
+            <configuration><mainClass>devdays.DeleteSchedule</mainClass></configuration>
+          </execution>
         </executions>
       </plugin>
     </plugins>

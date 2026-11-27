@@ -8,8 +8,11 @@ TODO 1 guards the new step with a patch. The markers `TODO N start` and `TODO N 
 ## Why it works
 The patch marks the change in the history. Old runs have no marker and skip the step, new runs record the marker and run it.
 
-## Run
+## Run the tests
 ```bash
 cd python/15_safe_deploys/solution
 uv run pytest
 ```
+No server needed.
+
+This topic is checked with tests only. There is no live run.

@@ -19,6 +19,9 @@ The check fails until the TODOs are done.
 ## The check
 After 25 items the cart has all 25 items and has continued as new at least once.
 
+## Run it live
+No live run for this topic: the check is the exercise.
+
 ## Stretch
 Change `max_per_run` to 5 and count the runs.
 

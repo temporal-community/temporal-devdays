@@ -12,6 +12,13 @@ Schedule "nightly-report"  ── every minute ──▶  Workflow run 1, run 2,
 (stored in Temporal)                            each one visible in the Web UI
 ```
 
+## Pause, delete, or let it end
+- **Pause** keeps the Schedule but stops new runs. Use it for a planned break.
+- **Delete** removes the Schedule. Runs already started finish on their own.
+- **Limit** the number of runs (`limited_actions` in Python, `setLimitedAction` in Java) for a demo, so a forgotten Schedule ends by itself.
+
+A Schedule keeps starting Workflows until you stop it, even after you close your terminal. Delete demo Schedules when you are done.
+
 ## Use it when
 - Something must run on a calendar or an interval: nightly jobs, hourly syncs.
 - You want to pause or trigger it by hand.

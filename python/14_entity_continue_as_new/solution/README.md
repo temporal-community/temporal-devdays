@@ -8,8 +8,11 @@ TODO 1 ends the run and starts a new one with the state carried forward. The mar
 ## Why it works
 Each run records only its own messages. The state travels in the argument, so the cart loses nothing.
 
-## Run
+## Run the tests
 ```bash
 cd python/14_entity_continue_as_new/solution
 uv run pytest
 ```
+No server needed.
+
+This topic is checked with tests only. There is no live run.

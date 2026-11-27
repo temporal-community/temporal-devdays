@@ -20,6 +20,9 @@ The check fails until the TODOs are done.
 ## The check
 More than one item is made at once, and the history shows a child Workflow with the id `ship-o1`.
 
+## Run it live
+No live run for this topic: the check is the exercise.
+
 ## Stretch
 Add a fourth item and check that the time barely changes.
 

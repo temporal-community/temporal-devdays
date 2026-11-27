@@ -22,6 +22,7 @@ The check fails until the TODOs are done.
 The Query returns `waiting`, the Update returns `150`, a negative Update is rejected, and after the Signal the result is `sent 150`.
 
 ## Run it live
+Do this after the check passes. Start `temporal server start-dev` in terminal 1, then run these from `python/04_messages/exercise`:
 ```bash
 uv run python worker.py      # terminal 2
 uv run python starter.py     # terminal 3

@@ -8,8 +8,19 @@ TODO 1 to 4 fill in the Signal, Query, Update and Update validator bodies. The m
 ## Why it works
 The Signal flips the flag the Workflow waits on, the Query only reads, and the Update changes state and answers after the validator accepts the input.
 
-## Run
+## Run the tests
 ```bash
 cd python/04_messages/solution
 uv run pytest
 ```
+No server needed.
+
+## Run it live
+Start the dev server first: `temporal server start-dev` (Web UI at http://localhost:8233). Then, from `python/04_messages/solution`:
+```bash
+uv run python worker.py      # terminal 2
+uv run python starter.py      # terminal 3
+```
+You should see `Started transfer-1`.
+
+When you are done, stop it: `temporal workflow terminate --workflow-id transfer-1`

@@ -8,8 +8,17 @@ TODO 1 sets the Retry Policy. TODO 2 marks the invalid card as non-retryable. Th
 ## Why it works
 The policy caps the retries. A non-retryable error tells Temporal to stop now, so a final error does not retry.
 
-## Run
+## Run the tests
 ```bash
 cd java/03_retries/solution
 mvn test
 ```
+No server needed.
+
+## Run it live
+Start the dev server first: `temporal server start-dev` (Web UI at http://localhost:8233). Then, from `java/03_retries/solution`:
+```bash
+mvn -q compile exec:java@worker      # terminal 2
+mvn -q compile exec:java@starter      # terminal 3
+```
+You should see `charged on attempt 3`.

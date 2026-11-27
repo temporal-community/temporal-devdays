@@ -20,6 +20,7 @@ class SchedulesTest {
         assertEquals("report", action.getOptions().getWorkflowId());
         assertEquals("reports", action.getOptions().getTaskQueue());
         assertEquals(Duration.ofMinutes(1), schedule.getSpec().getIntervals().get(0).getEvery());
+        assertEquals(5, schedule.getState().getRemainingActions());
     }
 
     @Test

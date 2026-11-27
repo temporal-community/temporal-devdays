@@ -8,8 +8,11 @@ TODO 1 waits with a timeout. TODO 2 stores the approver. The markers `TODO N sta
 ## Why it works
 The wait is a durable Timer raced against the Signal, so the Workflow continues on whichever comes first.
 
-## Run
+## Run the tests
 ```bash
 cd java/12_human_in_the_loop/solution
 mvn test
 ```
+No server needed.
+
+This topic is checked with tests only. There is no live run.

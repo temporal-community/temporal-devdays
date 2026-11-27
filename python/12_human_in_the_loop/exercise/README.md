@@ -18,6 +18,9 @@ The check fails until the TODOs are done.
 ## The check
 After `approve("alice")` the result is `approved by alice`. With no answer the result is `timed out`.
 
+## Run it live
+No live run for this topic: the check is the exercise.
+
 ## Stretch
 Change the timeout to 1 hour and see that the test still finishes at once.
 

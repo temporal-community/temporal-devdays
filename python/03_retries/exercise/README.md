@@ -20,6 +20,7 @@ The check fails until the TODOs are done.
 The `flaky` card is charged on attempt 3 with a policy of at most 5 attempts, and the `bad` card is tried only once.
 
 ## Run it live
+Do this after the check passes. Start `temporal server start-dev` in terminal 1, then run these from `python/03_retries/exercise`:
 ```bash
 uv run python worker.py      # terminal 2
 uv run python starter.py     # terminal 3

@@ -8,8 +8,17 @@ TODO 1 registers the Workflow and the Activity on the Worker. TODO 2 calls the A
 ## Why it works
 The Worker is what runs your code. The Workflow decides the steps, and `execute_activity` hands the real work to the Activity.
 
-## Run
+## Run the tests
 ```bash
 cd java/01_hello/solution
 mvn test
 ```
+No server needed.
+
+## Run it live
+Start the dev server first: `temporal server start-dev` (Web UI at http://localhost:8233). Then, from `java/01_hello/solution`:
+```bash
+mvn -q compile exec:java@worker      # terminal 2
+mvn -q compile exec:java@starter      # terminal 3
+```
+You should see `Hello, Temporal!`.

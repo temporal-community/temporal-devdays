@@ -8,8 +8,11 @@ TODO 1 replaces the Activity with an `if`. TODO 2 splits one Activity into two. 
 ## Why it works
 Plain logic needs no Activity. With one Activity per outside call, a retry repeats only the step that failed.
 
-## Run
+## Run the tests
 ```bash
 cd java/09_activity_design/solution
 mvn test
 ```
+No server needed.
+
+This topic is checked with tests only. There is no live run.

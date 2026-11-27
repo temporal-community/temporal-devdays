@@ -21,6 +21,7 @@ The check fails until the TODOs are done.
 The answer is `It is sunny in Pune`, the history shows two model Activities and one tool Activity, and the model Activity retries at most 3 times.
 
 ## Run it live
+Do this after the check passes. Start `temporal server start-dev` in terminal 1, then run these from `python/16_ai_agent_loop/exercise`:
 ```bash
 uv run python worker.py      # terminal 2
 uv run python starter.py     # terminal 3

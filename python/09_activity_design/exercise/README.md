@@ -20,6 +20,9 @@ The check fails until the TODOs are done.
 ## The check
 The Claim decision runs no Activity. The new user is added once even though the email fails on the first try.
 
+## Run it live
+No live run for this topic: the check is the exercise.
+
 ## Stretch
 Make `send_welcome` fail twice and confirm the user is still added only once.
 

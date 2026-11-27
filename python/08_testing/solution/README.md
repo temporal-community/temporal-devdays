@@ -8,8 +8,11 @@ TODO 1 to 4 are the four tests. The markers `TODO N start` and `TODO N end` show
 ## Why it works
 Time skipping moves the test clock forward, fake Activities stand in for the real ones, and replay checks the code against a recorded run.
 
-## Run
+## Run the tests
 ```bash
 cd python/08_testing/solution
 uv run pytest
 ```
+No server needed.
+
+This topic is checked with tests only. There is no live run.

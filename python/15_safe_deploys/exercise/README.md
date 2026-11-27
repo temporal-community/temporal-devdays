@@ -19,6 +19,9 @@ The check fails until the TODOs are done.
 ## The check
 A history recorded by the old code (`history_v1.json` / `history-v1.json`) still replays, and a new run does check the stock.
 
+## Run it live
+No live run for this topic: the check is the exercise.
+
 ## Stretch
 Open `workflow_v1.py` / `OrderWorkflowV1Impl.java` and compare it with the new Workflow.
 

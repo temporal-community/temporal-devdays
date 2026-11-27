@@ -20,6 +20,9 @@ The check fails until the TODOs are done.
 ## The check
 A second start of the same transfer is rejected, and two `add_item` calls on one order give one Workflow holding both items.
 
+## Run it live
+No live run for this topic: the check is the exercise.
+
 ## Stretch
 Start the same transfer a third time and read the error you get.
 

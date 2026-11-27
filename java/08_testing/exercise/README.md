@@ -20,6 +20,9 @@ The check fails until the TODOs are done.
 ## The check
 Your four tests pass. They test code that already works, so a failing check means a test is still a TODO.
 
+## Run it live
+No live run for this topic: the check is the exercise.
+
 ## Stretch
 Break `PizzaWorkflow` on purpose (swap two lines) and watch your replay test fail.
 

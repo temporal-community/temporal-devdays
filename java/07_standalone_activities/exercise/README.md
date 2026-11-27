@@ -19,6 +19,7 @@ The check fails until the TODOs are done.
 `run_now` / `runNow` runs the Activity with the right id, queue and timeout, and `run_later` / `runLater` adds a 6 hour start delay.
 
 ## Run it live
+Do this after the check passes. Start `temporal server start-dev` in terminal 1, then run these from `java/07_standalone_activities/exercise`:
 ```bash
 mvn -q compile exec:java@worker      # terminal 2
 mvn -q compile exec:java@starter     # terminal 3
