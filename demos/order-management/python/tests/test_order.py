@@ -13,6 +13,7 @@ from workflows import OrderWorkflow
 @pytest.fixture
 async def env():
     activities.calls.clear()
+    activities.charged.clear()
     async with await WorkflowEnvironment.start_time_skipping() as env:
         async with AsyncExitStack() as stack:
             for worker in make_workers(env.client):
@@ -60,6 +61,8 @@ async def test_bad_card_fails_fast_and_releases_the_stock(env):
     assert activities.calls.count("charge") == 1
     assert "release_stock" in activities.calls
     assert "refund_charge" not in activities.calls, "a declined card moved no money"
+    assert "refund_skipped" in activities.calls, "the refund still runs, finds no charge and does nothing"
+    assert activities.calls.index("refund_skipped") < activities.calls.index("release_stock"), "undo runs in reverse order"
     assert not any(c.startswith("ship:") for c in activities.calls)
 
 

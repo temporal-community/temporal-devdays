@@ -49,12 +49,12 @@ public class OrderWorkflowImpl implements OrderWorkflow {
         }
 
         step = "charging card";
+        undo.add(() -> payments.refundCharge(order));  // registered before the step: a charge can land even if the call fails
         try {
             payments.charge(order);
         } catch (ActivityFailure e) {
             return cancel(order, undo, "card declined");
         }
-        undo.add(() -> payments.refundCharge(order));  // a declined card moved no money, so this is added after the charge
 
         step = "shipping";
         ShipmentWorkflow shipment = Workflow.newChildWorkflowStub(ShipmentWorkflow.class,

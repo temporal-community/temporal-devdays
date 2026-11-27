@@ -15,10 +15,15 @@ public class PaymentActivitiesImpl implements PaymentActivities {
         if (order.scenario().equals("flaky_card") && attempt < 3) {
             throw new RuntimeException("payment API unavailable");
         }
+        Calls.charged.add(order.orderId());
     }
 
     @Override
     public void refundCharge(OrderInput order) {
-        Calls.all.add("refund_charge");
+        if (Calls.charged.remove(order.orderId())) {   // safe to run when nothing was charged, or twice
+            Calls.all.add("refund_charge");
+        } else {
+            Calls.all.add("refund_skipped");
+        }
     }
 }

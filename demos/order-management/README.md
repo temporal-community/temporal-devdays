@@ -55,11 +55,9 @@ A service is a Worker listening on one task queue. It holds Activities (or, for 
 | 7 | ship the 3 items at the same time | shipping | `shipping` | 3 Activities |
 | 8 | the order is done | `orders` | none | Workflow returns |
 
-If step 5 fails for good (a declined card), step 3 is undone with `release_stock` and steps 6 and 7 never run, so no `ship-<id>` appears.
+If step 5 fails for good (a declined card), the order undoes its steps in reverse. The undo for the charge is registered before the charge, because a charge can land even when the call fails. Here no money moved, so `refund_charge` finds nothing to refund and does nothing, then `release_stock` frees the stock. Steps 6 and 7 never run, so no `ship-<id>` appears.
 
 If step 7 fails (**Shipping fails**), the child Workflow fails and the order undoes its steps in reverse: `refund_charge` on `payments`, then `release_stock` on `inventory`. Here `ship-<id>` exists and shows as failed.
-
-One simplification: `refund_charge` is registered after the charge succeeds, because a declined card moves no money. A production system registers it first, and the refund checks whether a charge exists, because a charge can land while the reply is lost (concept 10).
 
 What this shows about microservices:
 - **Services never call each other.** The Workflow calls each one by its task queue, so there is no service-to-service HTTP, no queue wiring and no retry code in the services.
@@ -119,7 +117,7 @@ mvn -q compile exec:java@worker -Dexec.args="payments"    # terminal 6
 |---|---|---|---|
 | Happy path | stock, charge, then a child Workflow ships the three items in parallel | services work together without calling each other | `order-<id>` and its child `ship-<id>` |
 | Flaky card | the charge fails twice, the Retry Policy makes attempt 3 pass | Temporal retries for you, no retry loop in your code | the `charge` Activity shows 3 attempts |
-| Bad card | non-retryable error, the reserved stock is released, order cancelled | some errors must not be retried, so earlier steps are undone (Saga) | `release_stock` runs after `charge` fails |
+| Bad card | non-retryable error, the undo steps run: the refund finds no charge, the reserved stock is released, order cancelled | some errors must not be retried, so earlier steps are undone (Saga), and an undo must be safe to run when there is nothing to undo | `refund_charge` and `release_stock` run after `charge` fails |
 | Needs approval | the Workflow waits for a Signal, an Update can change the address first | a Workflow can wait for a person without using a thread | click Approve, or Change address (a short address is rejected) |
 | Shipping fails | the card is charged, then one item cannot ship, so the child Workflow fails | a full Saga: undo in reverse order, `refund_charge` then `release_stock` | the order's history, and `ship-<id>` showing Failed |
 

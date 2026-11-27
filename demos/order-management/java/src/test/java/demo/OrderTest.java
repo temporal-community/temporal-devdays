@@ -21,6 +21,7 @@ class OrderTest {
     @BeforeEach
     void setUp() {
         Calls.all.clear();
+        Calls.charged.clear();
         env = TestWorkflowEnvironment.newInstance();
         WorkerApp.register(env::newWorker, WorkerApp.SERVICES);
         env.start();
@@ -78,6 +79,8 @@ class OrderTest {
         assertEquals(1, count("charge"));
         assertEquals(1, count("release_stock"));
         assertEquals(0, count("refund_charge"), "a declined card moved no money");
+        assertEquals(1, count("refund_skipped"), "the refund still runs, finds no charge and does nothing");
+        assertTrue(Calls.all.indexOf("refund_skipped") < Calls.all.indexOf("release_stock"), "undo runs in reverse order");
         assertTrue(Calls.all.stream().noneMatch(c -> c.startsWith("ship:")));
     }
 

@@ -51,11 +51,11 @@ class OrderWorkflow:
                 return await self.cancel(order, undo, "approval timed out")
 
         self.step = "charging card"
+        undo.append((refund_charge, "payments"))  # registered before the step: a charge can land even if the call fails
         try:
             await workflow.execute_activity(charge, order, task_queue="payments", **OPTS)
         except ActivityError:
             return await self.cancel(order, undo, "card declined")
-        undo.append((refund_charge, "payments"))  # a declined card moved no money, so this is added after the charge
 
         self.step = "shipping"
         try:

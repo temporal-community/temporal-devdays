@@ -4,6 +4,7 @@ from temporalio.exceptions import ApplicationError
 from models import OrderInput
 
 calls: list[str] = []  # lets the tests see what ran
+charged: set[str] = set()  # orders whose card was charged, so the refund can tell
 
 
 @activity.defn
@@ -29,11 +30,16 @@ async def charge(order: OrderInput) -> None:
         raise ApplicationError("card declined", non_retryable=True)
     if order.scenario == "flaky_card" and activity.info().attempt < 3:
         raise RuntimeError("payment API unavailable")
+    charged.add(order.order_id)
 
 
 @activity.defn
 async def refund_charge(order: OrderInput) -> None:
-    calls.append("refund_charge")
+    if order.order_id in charged:   # safe to run when nothing was charged, or twice
+        charged.discard(order.order_id)
+        calls.append("refund_charge")
+    else:
+        calls.append("refund_skipped")
 
 
 @activity.defn
