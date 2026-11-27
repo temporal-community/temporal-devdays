@@ -59,6 +59,8 @@ If step 5 fails for good (a declined card), step 3 is undone with `release_stock
 
 If step 7 fails (**Shipping fails**), the child Workflow fails and the order undoes its steps in reverse: `refund_charge` on `payments`, then `release_stock` on `inventory`. Here `ship-<id>` exists and shows as failed.
 
+One simplification: `refund_charge` is registered after the charge succeeds, because a declined card moves no money. A production system registers it first, and the refund checks whether a charge exists, because a charge can land while the reply is lost (concept 10).
+
 What this shows about microservices:
 - **Services never call each other.** The Workflow calls each one by its task queue, so there is no service-to-service HTTP, no queue wiring and no retry code in the services.
 - **A service can be down without losing the order.** Stop `payments` and an order waits at "charging card". Start it again and the order carries on. Try it below.

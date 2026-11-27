@@ -14,7 +14,7 @@ invalid card ✗ ─────────────────────
 
 ## How it works
 - The default Retry Policy: first wait 1 second, wait doubles each time (backoff 2.0), capped at 100 seconds, unlimited attempts. You can set a maximum number of attempts and a cap on the wait.
-- **Start-to-Close** is the time limit for one attempt. It is the timeout you should always set. **Schedule-to-Close** is the limit for the whole job, retries included. **Schedule-to-Start** is how long a task may wait for a Worker. **Heartbeat** timeout is for long Activities that report progress.
+- **Start-to-Close** is the time limit for one attempt. It is the timeout you should always set. **Schedule-to-Close** is the limit for the whole job, retries included. **Schedule-to-Start** is how long a task may wait for a Worker. **Heartbeat** timeout is for long Activities that report progress. Heartbeats are also how a cancellation request reaches a running Activity, so an Activity that never heartbeats cannot be cancelled.
 - Retries happen inside Temporal, with no code in your Activity. The Workflow does not see the failed attempts, only the final result. The Web UI shows the attempt number and the last error.
 - An error you mark non-retryable (in Python `ApplicationError(..., non_retryable=True)`, in Java `ApplicationFailure.newNonRetryableFailure`) stops the retries and reaches the Workflow.
 
@@ -27,7 +27,7 @@ invalid card ✗ ─────────────────────
 - **Set Start-to-Close on every Activity**, sized to the slowest normal run plus margin. A different value per Activity, not one number everywhere.
 - **Retry forever or cap it?** Forever is fine when the step must eventually happen and you will be alerted. Cap it (attempts or Schedule-to-Close) when a late result is useless.
 - **Which errors are final?** Decide per Activity. Bad input and business rejections are final. Timeouts, 5xx and connection errors are temporary.
-- **Idempotency**: an Activity can run more than once, for example if the Worker dies after the call but before reporting. Use an idempotency key with the other system so a retry does not charge twice.
+- **Idempotency**: an Activity can run more than once, for example if the Worker dies after the call but before reporting. Use an idempotency key with the other system so a retry does not charge twice. The Workflow ID or a business ID (an order number) makes a good key.
 - **Do not retry at the Workflow level** to cover Activity failures. Let the Activity's Retry Policy do it.
 
 ## Failure modes

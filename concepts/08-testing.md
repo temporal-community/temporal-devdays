@@ -15,7 +15,7 @@ Replay test     : recorded history  +  your code  →  still matches?
 
 ## How it works
 - **Activity test**: call the Activity function inside an Activity test environment (`ActivityEnvironment` in Python, `TestActivityEnvironment` in Java). You get a real Activity context without a server.
-- **Workflow test**: start a test environment with time skipping (`WorkflowEnvironment.start_time_skipping()` in Python, `TestWorkflowEnvironment` in Java). It runs an in-process test server and a Worker. When the Workflow is only waiting on a Timer, the clock jumps ahead.
+- **Workflow test**: start a test environment, register your Workflow and Activities on a Worker in it, and run the Workflow with fresh IDs for each test. `WorkflowEnvironment.start_local()` (Python) runs a real local server and is the default choice. `start_time_skipping()` (Python) or `TestWorkflowEnvironment` (Java) runs an in-process test server whose clock jumps ahead while the Workflow waits on a Timer. Use it only when the Workflow has long Timers, because it cannot be shared between tests and does not behave like the full server.
 - **Fakes**: register your own Activity with the same name as the real one, returning what the test needs or raising an error.
 - **Replay test**: load an exported history and run your Workflow code against it. A mismatch fails the test.
 

@@ -18,7 +18,9 @@ same Workflow ID, short history in every run
 - A history warns at 10,240 events or 10 MB and is stopped at 51,200 events or 50 MB. A Workflow that loops for ever must start a new run before that.
 - **Continue-As-New** closes the current run and starts a new run with the same Workflow ID, a fresh history, and the arguments you pass. Messages sent to the ID reach the new run.
 - The SDK tells you when to do it (`is_continue_as_new_suggested` in Python, `isContinueAsNewSuggested` in Java), or you do it every N events.
-- Before continuing, finish handling any messages that are being processed, and pass along anything not yet handled, so none are lost.
+- Before continuing, finish handling any messages that are being processed (in Python, wait for `all_handlers_finished`), and pass along anything not yet handled, so none are lost.
+- Timers and pending Activities do not carry over. Start them again in the new run.
+- A message can reach the new run before its `run` method starts. In Python, receive the carried state in an `@workflow.init` method (it takes the same arguments as `run`), so the state is ready before any handler runs.
 
 ## Production use cases
 - **Shopping carts and accounts**: one Workflow per entity, living for weeks.
@@ -29,7 +31,7 @@ same Workflow ID, short history in every run
 ## Design decisions
 - **When to continue**: by size (the SDK's suggestion), or on a natural boundary such as every 1,000 messages or once a day.
 - **What to carry**: the whole state the next run needs, kept small. Store large data elsewhere and carry a reference.
-- **Pending messages**: drain the handlers first, or pass unhandled items forward.
+- **Pending messages**: drain the handlers first, or pass unhandled items forward. Set up the carried state before the handlers can run, or an early message is overwritten.
 - **One Workflow per entity, with the business ID**: this ties in with concept 11.
 - **Search and visibility**: the Workflow ID stays the same across runs, so use it to find the entity. Each run has its own Run ID.
 

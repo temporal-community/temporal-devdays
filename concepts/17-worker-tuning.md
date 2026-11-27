@@ -16,7 +16,7 @@ cache of recent Workflows (avoids replay) lives in the Worker's memory
 ## How it works
 - **Slots** cap how many tasks run at once: Activity slots (`max_concurrent_activities`, `setMaxConcurrentActivityExecutionSize`) and Workflow task slots. A full Worker leaves tasks waiting in the queue.
 - **Pollers** are the requests a Worker keeps open to fetch tasks. Too few and a Worker with free slots waits idle for work. Newer SDKs can adjust the poller count for you (poller autoscaling).
-- **Rate limits**: a per-Worker limit on Activity starts per second (`max_activities_per_second`), and a per-task-queue limit (`max_task_queue_activities_per_second`) applied by the server across all Workers.
+- **Rate limits**: a per-Worker limit on Activity starts per second (`max_activities_per_second`), and a per-task-queue limit (`max_task_queue_activities_per_second`) applied by the server across all Workers. The per-Worker limit multiplies by the number of Workers, so use the task-queue limit for a cap that must hold for the whole fleet.
 - **Sticky cache**: a Worker keeps recent Workflows in memory (`max_cached_workflows`, `setWorkflowCacheSize`). A cached Workflow continues without replay. A small cache means more replay and more load.
 - **Resource-based tuning**: instead of fixed slot numbers, a Worker can add and remove slots to hold CPU and memory near a target.
 - **Task queue and Worker count**: more Workers on a queue share its tasks. Separate queues isolate different kinds of work.
@@ -39,7 +39,8 @@ cache of recent Workflows (avoids replay) lives in the Worker's memory
 - **Large fan-outs** (concept 13): slots decide how fast 10,000 Activities drain.
 
 ## Design decisions
-- **Scale out before tuning up**: add Worker processes before raising slot counts on one machine.
+- **Scale out before tuning up**: add Worker processes before raising slot counts on one machine, and run at least two Workers per queue so one crash does not stop the work.
+- **Python sync Activities** run on a thread pool you give the Worker (`activity_executor`). Make it at least as large as the Activity slots. Async Activities need no executor but must never block the event loop.
 - **Match slots to the work**: CPU-heavy Activities need few slots, waiting on the network allows many.
 - **Isolate**: slow, heavy, or rate-limited work gets its own task queue.
 - **Always set timeouts and heartbeats**: a heartbeat on a long Activity lets Temporal notice a dead Worker quickly instead of waiting out the full timeout (concept 03).

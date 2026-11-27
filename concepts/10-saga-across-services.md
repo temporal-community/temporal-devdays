@@ -26,6 +26,7 @@ check_fraud → [note undo] withdraw → deposit ✗
 
 ## Design decisions
 - **When to note the undo**: note it *before* the step when the step might take effect even though the call fails or the reply is lost (a withdrawal). Note it *after* the step when a failure proves nothing happened (a card declined with no money moved). Make every undo safe to run when there is nothing to undo.
+- **The order demo is simpler on purpose**: it registers `refund_charge` after the charge, because a declined card moves no money. A production system should register it first and make it check whether a charge exists, because a charge can land while the reply is lost.
 - **Order**: put steps that cannot be undone (an email already sent) last.
 - **Retry the undo**: undo steps are Activities with a Retry Policy, and they should retry until they succeed, because a half-undone saga is the worst state.
 - **Failed undo**: decide what happens when an undo itself cannot finish: alert a person, and keep the Workflow open for them.

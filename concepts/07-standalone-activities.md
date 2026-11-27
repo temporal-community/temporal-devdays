@@ -30,6 +30,7 @@ send later    client ──start, delay 6h──▶ Temporal holds it ... 6h ...
 - A Worker that has the Activity registered picks it up and runs it. The Retry Policy and timeouts work exactly as inside a Workflow (concept 03).
 - There is no Workflow history. The Activity has its own record: ID, status, attempts and result, which you can list with `temporal activity list`.
 - `execute` waits for the result. `start` returns a handle immediately.
+- A start delay applies to the first attempt only. Retries follow the Retry Policy, not the delay.
 
 ## Production use cases
 - **Notifications**: a welcome message now, a reminder later.
@@ -39,13 +40,13 @@ send later    client ──start, delay 6h──▶ Temporal holds it ... 6h ...
 
 ## Design decisions
 - **Activity or Workflow?** One independent step is an Activity. The moment you need a second step, a wait for a message, or an undo, use a Workflow.
-- **ID**: tie it to the business item so duplicates are caught.
-- **Timeouts**: Start-to-Close for each attempt, Schedule-to-Close for the whole job including the delay and retries.
+- **ID**: tie it to the business item. An Activity ID Conflict Policy covers a job that is still running, and an ID Reuse Policy covers one that finished (by default a finished ID can be used again). The ID stops duplicate submissions, idempotency stops duplicate effects: you need both.
+- **Timeouts**: Start-to-Close for each attempt, Schedule-to-Close for the whole job, retries included. By default an Activity retries until it succeeds or Schedule-to-Close runs out. Set Maximum Attempts to 1 for at-most-once.
 - **Idempotency**: an Activity can run more than once, so make the work safe to repeat.
 
 ## Failure modes
 - **No Worker registered the Activity**: it waits on the queue.
-- **Same ID while the first is still running**: the second start does not create a second job. Pick IDs that match the business item.
+- **Same ID while the first is still running**: the Activity ID Conflict Policy decides what happens. Pick IDs that match the business item.
 - **A delay without a Schedule-to-Close**: decide how long the job may stay pending before it is useless.
 
 ## What to measure

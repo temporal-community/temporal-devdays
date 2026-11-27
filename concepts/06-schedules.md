@@ -36,6 +36,7 @@ A Schedule keeps starting Workflows until you stop it, even after you close your
 - **Schedule or Timer?** A Schedule starts new Workflows on a calendar. A Timer waits inside one Workflow.
 - **Overlap policy**: pick it on purpose. Skip suits "latest wins" jobs. Buffering suits "every run must happen" jobs.
 - **Make the Workflow idempotent**: a run can be triggered, backfilled or retried, so the same time window may run twice.
+- **Many Schedules at once**: add jitter so they do not all start in the same second.
 - **Time zones and daylight saving**: use a calendar spec with a time zone, not a UTC interval, for "9 am local".
 - **Run duration**: if a run can outlast its interval, set a Workflow timeout and expect skips.
 - **Own the lifecycle**: someone must be responsible for deleting Schedules that are no longer needed.

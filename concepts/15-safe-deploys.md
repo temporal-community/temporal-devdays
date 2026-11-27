@@ -22,15 +22,15 @@ old run replays: skips check_stock   |   new run: runs check_stock
 
 ## Production use cases
 - **Adding a step to a long-running process**: add a fraud check to an order flow that has Workflows open for weeks.
-- **Changing a timeout or a branch** in a flow with open approvals.
+- **Changing which Activity is called, or the order of steps,** in a flow with open approvals. Changing a timeout, a Timer length, a Retry Policy or the arguments of a call needs no patch.
 - **Rolling out a risky change gradually** by routing new Workflows to a new version.
 
 ## Design decisions
-- **Patch or Worker Versioning?** Patching is code-level and needs no extra infrastructure. Worker Versioning avoids patches in code but means running more than one version of Workers. Pick one per team and stay consistent.
+- **Which approach?** Patching is code-level and needs no extra infrastructure. A new Workflow type (`OrderWorkflowV2`) suits a big incompatible change. Worker Versioning with **pinned** Workflows keeps each run on the Worker version it started on, so short Workflows need no patches. Long-running Workflows that must move to new code use **auto-upgrade**, and that still needs patching. Pick one per team and stay consistent.
+- **Python note**: the value of `patched()` is remembered after the first call, so do not use one patch ID in a loop.
 - **Replay in CI** with histories exported from production (concept 05). It is the best protection.
 - **Short-lived Workflows** that finish in seconds can be handled with a normal deploy, because nothing old is open.
-- **Clean up**: track every patch and remove it once the old runs are gone.
-- **Roll back**: a Worker can be rolled back to old code as long as history it has already written still matches.
+- **Clean up**: patch in, then deprecate (`deprecate_patch`), then remove, and only once no open Workflow can still be on the old path. Find open runs with a List Filter such as `TemporalChangeVersion = "check-stock"`, or `TemporalChangeVersion IS NULL` for runs from before the patch.
 
 ## Failure modes
 - **Unpatched change**: blocked Workflows after deploy. They continue when the code is fixed or reverted.

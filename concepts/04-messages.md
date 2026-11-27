@@ -27,7 +27,7 @@ Update  ◀─▶ Workflow   "set amount to 150"   (change + answer)
 
 ## Design decisions
 - **Signal or Update?** Use a Signal when the sender does not need an answer. Use an Update when the sender needs the result or a rejection. Updates give a faster, clearer error path for bad input.
-- **Validate early**: reject bad Updates in the validator, so they never enter the history.
+- **Validate early**: reject bad Updates in the validator, so they never enter the history. A validator must only read state: no changes, no Activities, no waiting.
 - **Keep Queries cheap and read-only.** They must not start Activities or change state.
 - **Waiting with a time limit**: a Workflow that waits for a person should also have a timeout and a plan for when it fires (escalate, cancel, remind).
 - **Message volume**: each Signal adds history events. A flood of Signals to one Workflow is a design problem. Batch them or restructure.
