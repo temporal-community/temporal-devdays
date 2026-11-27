@@ -25,6 +25,32 @@ send later    client ──start, delay 6h──▶ Temporal holds it ... 6h ...
 3. Run `temporal activity list`. Both are there, with an ID, a status and a type.
 4. Later the reminder needs steps: check preferences, send, record. Now you write a Workflow that calls the same Activity. The Activity does not change.
 
+## How it works
+- The client sends a start request for one Activity with an ID, a task queue and a timeout. Temporal stores it and puts it on the queue (after the delay, if there is one).
+- A Worker that has the Activity registered picks it up and runs it. The Retry Policy and timeouts work exactly as inside a Workflow (concept 03).
+- There is no Workflow history. The Activity has its own record: ID, status, attempts and result, which you can list with `temporal activity list`.
+- `execute` waits for the result. `start` returns a handle immediately.
+
+## Production use cases
+- **Notifications**: a welcome message now, a reminder later.
+- **Webhook handlers**: a request arrives and one Activity does the work with retries, so the handler can return quickly.
+- **Backfills and one-off jobs**: one Activity per record, each with its own retries and status.
+- **Calling slow or unreliable APIs** from a service that has no Workflows yet.
+
+## Design decisions
+- **Activity or Workflow?** One independent step is an Activity. The moment you need a second step, a wait for a message, or an undo, use a Workflow.
+- **ID**: tie it to the business item so duplicates are caught.
+- **Timeouts**: Start-to-Close for each attempt, Schedule-to-Close for the whole job including the delay and retries.
+- **Idempotency**: an Activity can run more than once, so make the work safe to repeat.
+
+## Failure modes
+- **No Worker registered the Activity**: it waits on the queue.
+- **Same ID while the first is still running**: the second start does not create a second job. Pick IDs that match the business item.
+- **A delay without a Schedule-to-Close**: decide how long the job may stay pending before it is useless.
+
+## What to measure
+- Activities waiting on the queue (schedule-to-start latency), failures per type, and how many are pending behind a start delay.
+
 ## Use it when
 - A job is one step: send a message, call an API, run a script.
 - You want retries and visibility without writing orchestration.
