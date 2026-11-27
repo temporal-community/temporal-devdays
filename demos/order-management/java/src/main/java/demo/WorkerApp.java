@@ -4,6 +4,7 @@ import io.temporal.client.WorkflowClient;
 import io.temporal.serviceclient.WorkflowServiceStubs;
 import io.temporal.worker.Worker;
 import io.temporal.worker.WorkerFactory;
+import io.temporal.worker.WorkerOptions;
 import java.util.List;
 import java.util.function.Function;
 
@@ -29,7 +30,8 @@ public class WorkerApp {
     public static void main(String[] args) {
         WorkflowClient client = WorkflowClient.newInstance(WorkflowServiceStubs.newLocalServiceStubs());
         WorkerFactory factory = WorkerFactory.newInstance(client);
-        register(factory::newWorker, args.length == 0 ? SERVICES : List.of(args));
+        register(queue -> factory.newWorker(queue, WorkerOptions.newBuilder().setIdentity("java-" + queue).build()),
+            args.length == 0 ? SERVICES : List.of(args));
         factory.start();
     }
 }

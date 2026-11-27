@@ -18,7 +18,7 @@ SERVICES = {
 
 
 def make_workers(client: Client, names: list[str] | None = None) -> list[Worker]:
-    return [Worker(client, task_queue=n, **SERVICES[n]) for n in (names or SERVICES)]
+    return [Worker(client, task_queue=n, identity=f"python-{n}", **SERVICES[n]) for n in (names or SERVICES)]
 
 
 async def main(names: list[str]):

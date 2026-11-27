@@ -5,6 +5,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sun.net.httpserver.HttpServer;
 import io.temporal.testing.TestWorkflowEnvironment;
+import io.temporal.worker.WorkerOptions;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Predicate;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -24,7 +28,7 @@ class WebAppTest {
     @BeforeEach
     void setUp() throws Exception {
         env = TestWorkflowEnvironment.newInstance();
-        WorkerApp.register(env::newWorker, WorkerApp.SERVICES);
+        WorkerApp.register(queue -> env.newWorker(queue, WorkerOptions.newBuilder().setIdentity("java-" + queue).build()), WorkerApp.SERVICES);
         env.start();
         server = WebApp.create(env.getWorkflowClient(), 0);
         server.start();
@@ -80,5 +84,61 @@ class WebAppTest {
         call("POST", "/approve/" + id, "{}");
         JsonNode s = waitFor(id, "state", "COMPLETED");
         assertEquals("9 New Road, Austin", s.get("address").asText());
+    }
+
+    JsonNode view(String id, Predicate<JsonNode> until) throws Exception {
+        JsonNode data = null;
+        for (int i = 0; i < 200; i++) {
+            data = WebApp.JSON.readTree(call("GET", "/timeline/" + id, null).body());
+            if (until.test(data)) return data;
+            Thread.sleep(50);
+        }
+        throw new AssertionError("timeline never reached the expected state: " + data);
+    }
+
+    List<String> names(JsonNode data, String field, String value) {
+        List<String> out = new ArrayList<>();
+        for (JsonNode s : data.get("steps")) {
+            if (s.get(field).asText().equals(value)) out.add(s.get("name").asText());
+        }
+        return out;
+    }
+
+    @Test
+    void theTimelineShowsTheStepsTheChildAndWhoRanThem() throws Exception {
+        JsonNode data = view(startOrder("happy"), d -> d.get("state").asText().equals("COMPLETED"));
+        assertEquals(List.of("check_stock", "reserve_stock", "charge"), names(data, "kind", "activity"));
+        for (JsonNode s : data.get("steps")) {
+            if (s.get("kind").asText().equals("activity")) assertEquals("java", s.get("language").asText());
+        }
+        JsonNode child = null;
+        for (JsonNode s : data.get("steps")) if (s.get("kind").asText().equals("child")) child = s;
+        assertEquals("done", child.get("status").asText());
+        assertEquals(3, child.get("items").size());
+        for (JsonNode item : child.get("items")) {
+            assertEquals("done", item.get("status").asText());
+            assertEquals("shipping", item.get("service").asText());
+        }
+    }
+
+    @Test
+    void theTimelineShowsTheUndoStepsInReverseOrder() throws Exception {
+        JsonNode data = view(startOrder("ship_fails"), d -> d.get("state").asText().equals("COMPLETED"));
+        assertEquals(List.of("refund_charge", "release_stock"), names(data, "undo", "true"));
+        for (JsonNode s : data.get("steps")) {
+            if (s.get("kind").asText().equals("child")) assertEquals("failed", s.get("status").asText());
+        }
+    }
+
+    @Test
+    void theApprovalCountdownAndTheMessageSteps() throws Exception {
+        String id = startOrder("approval");
+        view(id, d -> !d.get("countdown_ends").isNull());
+        call("POST", "/address/" + id, "{\"address\":\"99 Long Road, Pune\"}");
+        call("POST", "/approve/" + id, "{}");
+        JsonNode data = view(id, d -> d.get("state").asText().equals("COMPLETED"));
+        assertEquals(List.of("change_address"), names(data, "kind", "update"));
+        assertEquals(List.of("approve"), names(data, "kind", "signal"));
+        assertTrue(data.get("countdown_ends").isNull());
     }
 }

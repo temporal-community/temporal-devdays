@@ -3,6 +3,7 @@ import uuid
 from quart import Quart, jsonify, render_template, request
 from temporalio.client import Client, WorkflowUpdateFailedError
 
+import timeline
 from models import OrderInput
 from worker import TASK_QUEUE
 from workflows import OrderWorkflow
@@ -31,6 +32,7 @@ async def start():
         OrderInput(order_id, body["address"], body["scenario"]),
         id=f"order-{order_id}",
         task_queue=TASK_QUEUE,
+        memo={"scenario": body["scenario"]},
     )
     return jsonify(order_id=order_id)
 
@@ -44,6 +46,21 @@ async def status(order_id: str):
     if desc.status.name == "COMPLETED":
         out["result"] = (await handle.result()).status
     return jsonify(out)
+
+
+@app.get("/services")
+async def services():
+    return jsonify(await timeline.services(client))
+
+
+@app.get("/timeline/<order_id>")
+async def order_timeline(order_id: str):
+    return jsonify(await timeline.timeline(client, order_id))
+
+
+@app.get("/orders")
+async def orders():
+    return jsonify(await timeline.orders(client))
 
 
 @app.post("/approve/<order_id>")

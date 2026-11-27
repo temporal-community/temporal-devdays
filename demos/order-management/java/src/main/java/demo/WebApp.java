@@ -48,6 +48,9 @@ public class WebApp {
                 case "" -> send(ex, 200, "text/html; charset=utf-8", page());
                 case "start" -> send(ex, 200, start(body(ex)));
                 case "status" -> send(ex, 200, status(id));
+                case "services" -> send(ex, 200, Timeline.services(client));
+                case "timeline" -> send(ex, 200, Timeline.timeline(client, id));
+                case "orders" -> send(ex, 200, Timeline.orders(client));
                 case "approve" -> {
                     order(id).approve();
                     send(ex, 200, Map.of("ok", true));
@@ -63,7 +66,8 @@ public class WebApp {
     private Map<String, Object> start(Map<String, String> body) {
         String orderId = UUID.randomUUID().toString().substring(0, 6);
         OrderWorkflow wf = client.newWorkflowStub(OrderWorkflow.class, WorkflowOptions.newBuilder()
-            .setTaskQueue(WorkerApp.TASK_QUEUE).setWorkflowId("order-" + orderId).build());
+            .setTaskQueue(WorkerApp.TASK_QUEUE).setWorkflowId("order-" + orderId)
+            .setMemo(Map.of("scenario", body.get("scenario"))).build());
         WorkflowClient.start(wf::run, new OrderInput(orderId, body.get("address"), body.get("scenario")));
         return Map.of("order_id", orderId);
     }

@@ -123,7 +123,7 @@ mvn -q compile exec:java@worker -Dexec.args="payments"    # terminal 6
 
 ## Test
 
-No server needed. Both run the same eight scenario tests (one per scenario, plus the approval timeout, the address Update and a rejected address), and the Java project also has three web app tests.
+No server needed for the Java tests. Both run the same eight scenario tests (one per scenario, plus the approval timeout, the address Update and a rejected address). The Java project also has six web app tests (the page, the order, the address Update, and the timeline: steps, undo order, countdown). The Python project also has six tests of the data the page reads (`/timeline`, `/services`, `/orders`), which start a local Temporal server on their own, so the first run takes a few seconds longer.
 
 ```bash
 cd demos/order-management/python && uv run pytest -q
