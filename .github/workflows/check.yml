@@ -44,6 +44,30 @@ jobs:
       - run: make setup
       - run: make check-todos
 
+  demo:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: astral-sh/setup-uv@v10.4.0
+      - uses: actions/setup-java@v6.3.0
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: Install the Temporal CLI
+        run: |
+          curl -sSfL "https://temporal.download/cli/archive/latest?platform=linux&arch=amd64" -o temporal.tar.gz
+          tar -xzf temporal.tar.gz temporal
+          sudo mv temporal /usr/local/bin/
+      - name: Order demo in Python, then in Java
+        working-directory: demos/order-management
+        run: |
+          for mode in python java; do
+            ./run.sh $mode
+            python3 smoke.py --chaos || { ./run.sh logs; ./run.sh down; exit 1; }
+            ./run.sh down
+          done
+
   live:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest

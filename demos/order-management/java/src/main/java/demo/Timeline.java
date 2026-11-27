@@ -128,11 +128,14 @@ public class Timeline {
             if (step == null) {  // it finished between the two reads
                 continue;
             }
-            if (!p.getLastFailure().getMessage().isEmpty()) {
+            boolean scheduled = p.getState() == PendingActivityState.PENDING_ACTIVITY_STATE_SCHEDULED;
+            String nobody = "no Worker is picking this up on " + step.get("service");
+            if (scheduled && p.getLastFailure().hasTimeoutFailureInfo()) {  // the last try went to a Worker that is gone
+                step.putAll(Map.of("status", "waiting", "attempt", p.getAttempt(), "detail", nobody));
+            } else if (!p.getLastFailure().getMessage().isEmpty()) {
                 step.putAll(Map.of("status", "retrying", "attempt", p.getAttempt(), "detail", p.getLastFailure().getMessage()));
-            } else if (p.getState() == PendingActivityState.PENDING_ACTIVITY_STATE_SCHEDULED
-                    && now - p.getScheduledTime().getSeconds() > WAIT_SECONDS) {
-                step.putAll(Map.of("status", "waiting", "detail", "no Worker is picking this up on " + step.get("service")));
+            } else if (scheduled && now - p.getScheduledTime().getSeconds() > WAIT_SECONDS) {
+                step.putAll(Map.of("status", "waiting", "detail", nobody));
             }
         }
         for (Map<String, Object> s : read.steps()) {

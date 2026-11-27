@@ -6,6 +6,53 @@ Ideas from exercises [03](../../concepts/03-retries.md), [04](../../concepts/04-
 
 Inspired by [temporal-order-management-demo](https://github.com/temporal-sa/temporal-order-management-demo). This is a new, smaller implementation, not a copy.
 
+Presenting it? Follow the [RUNBOOK](RUNBOOK.md).
+
+## See it
+
+| | |
+|---|---|
+| ![A happy order: each step in the lane of the service that ran it, payments in Java and the rest in Python](docs/happy-path.png) | ![A flaky card: the charge is retried and shows the attempt number with the error](docs/flaky-retry.png) |
+| Each step sits in the lane of the service that ran it. Here `payments` is Java and the rest is Python. | The charge fails twice. Temporal retries it, and the page shows the attempt number and the error. |
+| ![A service is down: the charge waits for a Worker and the payments chip is red](docs/service-down.png) | ![Shipping fails: the child Workflow fails and the order undoes its steps in reverse](docs/ship-fails.png) |
+| `payments` is stopped. The order waits at the charge and nothing is lost. | One item cannot ship. The order refunds the card, then releases the stock. |
+
+## Quick start
+
+You need the [Temporal CLI](https://docs.temporal.io/cli), and either Python 3.11+ with [uv](https://docs.astral.sh/uv/), or Java 21 with Maven.
+
+```bash
+cd demos/order-management
+./run.sh python        # or: ./run.sh java, or ./run.sh mixed
+```
+
+Open http://localhost:5050. The Temporal Web UI is at http://localhost:8233. The script starts the Temporal dev server if it is not running, each of the four services as its own process, and the web app.
+
+| Command | What it does |
+|---|---|
+| `./run.sh python` / `java` / `mixed` | start everything in Python, in Java, or with `payments` in Java and the rest in Python |
+| `./run.sh status` | show what is running |
+| `./run.sh stop payments` | stop one service (Worker) |
+| `./run.sh start payments java` | start one service, in `python` (the default) or `java` |
+| `./run.sh logs` | show the end of every log |
+| `./run.sh smoke` | place an order for every scenario and check the result, add `--chaos` to also stop and start `payments` |
+| `./run.sh down` | stop everything this script started |
+
+### What the page shows
+
+| On the page | What it teaches |
+|---|---|
+| Four service lanes, one chip per step | the Workflow calls each service by its task queue, and no service calls another |
+| A **PY** or **JAVA** badge on each step and each lane | services can be written in different languages and still work together |
+| A chip that reads *attempt 2 of 5* with the error | Temporal retries failed Activities for you |
+| A purple *waiting for a Worker* chip and a red service chip | a service can be down without losing the order |
+| Dashed, hatched undo chips in reverse order | the Saga: undo earlier steps when a later one fails |
+| The child Workflow with its three `ship_item` calls | a child Workflow and Activities running in parallel |
+| Approve, Change address, and a countdown | a Signal, an Update that can be rejected, and a Timer |
+| Recent orders, and `?order=<id>` in the address bar | every order is a Workflow you can find and reopen |
+
+The page reads its data from three endpoints that both apps offer: `/timeline/<id>` (the Event History and any pending Activity), `/services` (which queues have a Worker, from the Worker identity `python-<service>` or `java-<service>`) and `/orders`. It reads history from Temporal, so it keeps working when a service is stopped.
+
 ## How the services fit together
 
 ```mermaid
@@ -25,6 +72,28 @@ flowchart LR
 | shipping | `shipping` | `ship_item` | 1 Activity | `ShipmentWorkflow`, once per item in parallel |
 
 A service is a Worker listening on one task queue. It holds Activities (or, for `orders`, Workflows). A service is not itself an Activity.
+
+| Part | Address |
+|---|---|
+| Web app (Python or Java) | http://localhost:5050 |
+| Temporal server | `localhost:7233` |
+| Temporal Web UI | http://localhost:8233 |
+
+```mermaid
+sequenceDiagram
+    participant W as Web app
+    participant O as orders: OrderWorkflow
+    participant I as inventory
+    participant P as payments
+    participant S as shipping: ShipmentWorkflow
+    W->>O: start order
+    O->>I: check_stock, reserve_stock
+    O->>P: charge (Temporal retries it)
+    O->>S: start the child Workflow
+    S->>S: ship_item for each item, in parallel
+    S-->>O: tracking id
+    Note over O,P: if shipping fails, undo in reverse: refund_charge on payments, then release_stock on inventory
+```
 
 ### The words used here
 
@@ -65,9 +134,9 @@ What this shows about microservices:
 - **Each service can use a different language.** The queue and Activity names are the contract. Python and Java services work together.
 - **Undo is the Workflow's job.** If something fails, the Workflow tells the earlier services to undo their work, in reverse order (Saga, as in exercise 10). Try **Shipping fails**: the card is refunded, then the stock is released.
 
-## Run it
+## Run it by hand
 
-You need the [Temporal CLI](https://docs.temporal.io/cli), and either Python 3.11+ with [uv](https://docs.astral.sh/uv/), or Java 21 with Maven.
+The `./run.sh` script above does all of this for you. These are the steps behind it.
 
 **Terminal 1: Temporal**
 ```bash
@@ -106,10 +175,13 @@ mvn -q compile exec:java@worker -Dexec.args="payments"    # terminal 6
 
 ## Try this: a service goes down
 
-1. Start all four services and the web app. Place a **Happy path** order. It ships.
-2. Stop `payments` (Ctrl+C in its terminal).
-3. Place another order. It stops at **Charge card** and stays running. In the Web UI the `charge` Activity is scheduled and waiting, with no Worker on `payments`.
-4. Start `payments` again. The same order finishes. Nothing was lost and nothing was retried by hand.
+1. `./run.sh python`, open http://localhost:5050 and place a **Happy path** order. It ships.
+2. `./run.sh stop payments`
+3. Place another order. Within about five seconds the `charge` chip turns purple (*waiting for a Worker*) and the `payments` chip at the top turns red. In the Web UI the `charge` Activity is scheduled, with no Worker on `payments`.
+4. `./run.sh start payments`. The same order finishes. Nothing was lost and nothing was retried by hand.
+5. Try `./run.sh start payments java` after stopping it: the badge on the `charge` chip now says JAVA.
+
+The red chip needs work waiting for it. With no orders in flight, the server only learns a Worker is gone after about a minute.
 
 ## Scenarios
 
@@ -123,12 +195,15 @@ mvn -q compile exec:java@worker -Dexec.args="payments"    # terminal 6
 
 ## Test
 
-No server needed for the Java tests. Both run the same eight scenario tests (one per scenario, plus the approval timeout, the address Update and a rejected address). The Java project also has six web app tests (the page, the order, the address Update, and the timeline: steps, undo order, countdown). The Python project also has six tests of the data the page reads (`/timeline`, `/services`, `/orders`), which start a local Temporal server on their own, so the first run takes a few seconds longer.
+No server is needed for the Java tests. Both run the same eight scenario tests (one per scenario, plus the approval timeout, the address Update and a rejected address). The Java project also has six web app tests (the page, the order, the address Update, and the timeline: steps, undo order, countdown). The Python project also has six tests of the data the page reads (`/timeline`, `/services`, `/orders`), which start a local Temporal server on their own, so the first run takes a few seconds longer.
 
 ```bash
 cd demos/order-management/python && uv run pytest -q
 cd demos/order-management/java && mvn -q test
+./run.sh python && ./run.sh smoke --chaos && ./run.sh down     # the whole demo, end to end
 ```
+
+Java has no tests for `/services`, the waiting state and `/orders`: its in-process test server cannot describe task queues or list Workflows. `./run.sh smoke` covers them in both languages.
 
 ## Troubleshooting
 
@@ -139,9 +214,12 @@ cd demos/order-management/java && mvn -q test
 
 ## Files
 
+- `run.sh`, `smoke.py`: start and stop the whole demo, and check every scenario end to end
+- `RUNBOOK.md`: how to present it, beat by beat
 - `python/workflows.py`: `OrderWorkflow` and `ShipmentWorkflow`, with the task queue on every Activity call
 - `python/activities.py`: the services' Activities, all simulated
 - `python/worker.py`: one Worker per service, `SERVICES` lists them
-- `python/app.py`, `python/templates/index.html`: the web app
-- `java/src/main/java/demo`: the same services and web app in Java, one interface and class per service
-- `python/tests`, `java/src/test`: one test per scenario
+- `python/app.py`, `python/timeline.py`, `python/templates/index.html`: the web app, the data it reads, and the page
+- `java/src/main/java/demo`: the same services and web app in Java, one interface and class per service, and `Timeline.java`
+- `python/tests`, `java/src/test`: one test per scenario, and tests of the data the page reads
+- `docs/`: screenshots used above

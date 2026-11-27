@@ -49,7 +49,7 @@ A failing check at the start is expected. It tells you which TODO is next.
 | 17 | [Worker tuning and performance](concepts/17-worker-tuning.md) | [exercise](python/17_worker_tuning/exercise) · [solution](python/17_worker_tuning/solution) | [exercise](java/17_worker_tuning/exercise) · [solution](java/17_worker_tuning/solution) |
 
 ## Demos
-- [Order management](demos/order-management): a small web app with retries, a Saga, a child Workflow, a Signal and an Update.
+- [Order management](demos/order-management): four services in Python or Java behind a live web page: retries, a service going down, a Saga, a child Workflow, a Signal and an Update. One command to run it, and a [RUNBOOK](demos/order-management/RUNBOOK.md) to present it.
 - [Observability](demos/observability): logs, traces, metrics and a Search Attribute, with or without Docker.
 
 ## Troubleshooting

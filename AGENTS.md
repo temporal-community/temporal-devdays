@@ -21,7 +21,7 @@ A learn-and-practice resource for Temporal. Each concept has a plain-words expla
 - `concepts/NN-topic.md`: one explanation per topic, shared by both languages.
 - `python/` and `java/`: one folder per topic, `NN_topic/`, with `exercise/` and `solution/` inside. Same NN and topic name in both languages.
 - `scripts/`: `check.sh`, `verify_repo.py` (structure), `behaviour.py` (tests and live smoke), `live.json` (live smoke table).
-- `demos/`: larger demos, one per PR. Each has its own README and uv project, and `check.sh` runs its tests. Port 5000 is taken by macOS AirPlay, so web apps use 5050.
+- `demos/`: larger demos, one per PR. Each has its own README and uv project, and `check.sh` runs its tests. Port 5000 is taken by macOS AirPlay, so web apps use 5050. `demos/order-management/run.sh` starts a whole demo (`python`, `java` or `mixed`) and `smoke.py` checks it end to end; the page `index.html` must stay identical in `python/templates` and `java/src/main/resources`.
 
 ## Exercise rules
 - Beginner level. Short code that fits on a screen. Minimal comments.

@@ -78,11 +78,14 @@ async def steps_of(client: Client, workflow_id: str):
         step = next((s for s in steps if s.get("activity_id") == p.activity_id and s["status"] == "running"), None)
         if step is None:   # it finished between the two reads
             continue
-        if p.last_failure.message:
+        scheduled = p.state == PendingActivityState.PENDING_ACTIVITY_STATE_SCHEDULED
+        nobody = f"no Worker is picking this up on {step['service']}"
+        if scheduled and p.last_failure.HasField("timeout_failure_info"):   # the last try went to a Worker that is gone
+            step.update(status="waiting", attempt=p.attempt, detail=nobody)
+        elif p.last_failure.message:
             step.update(status="retrying", attempt=p.attempt, detail=p.last_failure.message)
-        elif p.state == PendingActivityState.PENDING_ACTIVITY_STATE_SCHEDULED \
-                and time.time() - p.scheduled_time.seconds > WAIT_SECONDS:
-            step.update(status="waiting", detail=f"no Worker is picking this up on {step['service']}")
+        elif scheduled and time.time() - p.scheduled_time.seconds > WAIT_SECONDS:
+            step.update(status="waiting", detail=nobody)
     for step in steps:
         step.pop("activity_id", None)
         step["language"] = language([step["worker"]])

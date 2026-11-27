@@ -232,7 +232,7 @@ function stepIcon(s) { return s.undo ? "undo" : ["signal", "update", "child"].in
 function meta(s) {
   if (s.status === "retrying") return `attempt ${s.attempt} of ${MAX_ATTEMPTS}`;
   const base = s.undo ? "undo · " + LABEL[s.status] : s.kind === "signal" || s.kind === "update" ? s.kind : LABEL[s.status];
-  return s.attempt > 1 ? `${base} · attempt ${s.attempt}` : base;
+  return s.attempt > 1 && s.status === "done" ? `${base} · attempt ${s.attempt}` : base;
 }
 function chip(s, i) {
   const full = `${s.name}, ${s.service}${s.language ? ", " + s.language : ""}, ${meta(s)}${s.detail ? ": " + s.detail : ""}`;
