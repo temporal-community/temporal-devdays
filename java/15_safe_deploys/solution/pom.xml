@@ -10,6 +10,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <temporal.version>1.40.0</temporal.version>
     <worker.main>devdays.WorkerApp</worker.main>
+    <starter.main>devdays.Starter</starter.main>
   </properties>
 
   <dependencies>
@@ -55,6 +56,10 @@
           <execution>
             <id>worker</id>
             <configuration><mainClass>${worker.main}</mainClass></configuration>
+          </execution>
+          <execution>
+            <id>starter</id>
+            <configuration><mainClass>${starter.main}</mainClass></configuration>
           </execution>
         </executions>
       </plugin>

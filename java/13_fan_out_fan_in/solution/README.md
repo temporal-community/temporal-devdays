@@ -15,4 +15,10 @@ mvn test
 ```
 No server needed.
 
-This topic is checked with tests only. There is no live run.
+## Run it live
+Start the dev server first: `temporal server start-dev` (Web UI at http://localhost:8233). Then, from `java/13_fan_out_fan_in/solution`:
+```bash
+mvn -q compile exec:java@worker      # terminal 2
+mvn -q compile exec:java@starter      # terminal 3
+```
+The starter shows three items are made in parallel and a child Workflow ships the order. You should see `shipped o1`.

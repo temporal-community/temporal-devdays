@@ -20,7 +20,12 @@ The check fails until the TODOs are done.
 After 25 items the cart has all 25 items and has continued as new at least once.
 
 ## Run it live
-No live run for this topic: the check is the exercise.
+Do this after the check passes. Start `temporal server start-dev` in terminal 1, then run these from `python/14_entity_continue_as_new/exercise`:
+```bash
+uv run python worker.py      # terminal 2
+uv run python starter.py      # terminal 3
+```
+The starter shows a cart receives 7 items and continues as new every 3, keeping every item. You should see `cart has 7 items after 3 runs`.
 
 ## Stretch
 Change `max_per_run` to 5 and count the runs.

@@ -21,7 +21,12 @@ The check fails until the TODOs are done.
 The Claim decision runs no Activity. The new user is added once even though the email fails on the first try.
 
 ## Run it live
-No live run for this topic: the check is the exercise.
+Do this after the check passes. Start `temporal server start-dev` in terminal 1, then run these from `python/09_activity_design/exercise`:
+```bash
+uv run python worker.py      # terminal 2
+uv run python starter.py      # terminal 3
+```
+The starter shows a claim is decided in the Workflow, then a user is onboarded. You should see `claim decision: review`.
 
 ## Stretch
 Make `send_welcome` fail twice and confirm the user is still added only once.

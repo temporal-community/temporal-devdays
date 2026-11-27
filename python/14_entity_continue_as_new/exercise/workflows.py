@@ -19,7 +19,7 @@ class CartWorkflow:
 
     @workflow.run
     async def run(self, state: CartState, max_per_run: int = 10) -> CartState:
-        self.items = list(state.items)
+        self.items = list(state.items) + self.items   # signals can arrive before run starts
         self.runs = state.runs
         await workflow.wait_condition(lambda: self.added >= max_per_run or self.closed)
         if self.closed:

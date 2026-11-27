@@ -29,3 +29,14 @@ async def test_the_cart_keeps_every_item_across_runs():
             result = await asyncio.wait_for(handle.result(), 30)
     assert result.items == [f"item-{i}" for i in range(25)]
     assert result.runs >= 2, "TODO 1: continue as new after max_per_run items, carrying the items forward"
+
+
+async def test_a_signal_that_arrives_with_the_start_is_not_lost():
+    async with await WorkflowEnvironment.start_time_skipping() as env:
+        async with make_worker(env.client):
+            handle = await env.client.start_workflow(
+                CartWorkflow.run, args=[CartState(["a"], 2), 10], id="cart-2", task_queue=TASK_QUEUE,
+                start_signal="add_item", start_signal_args=["b"])
+            await handle.signal(CartWorkflow.close)
+            result = await asyncio.wait_for(handle.result(), 30)
+    assert result.items == ["a", "b"], "messages that arrive before the run starts must be kept"

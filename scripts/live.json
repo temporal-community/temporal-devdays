@@ -225,5 +225,125 @@
     "expect": "rendered 30 items",
     "wait": 20,
     "cleanup": []
+  },
+  {
+    "dir": "python/09_activity_design/solution",
+    "workers": [
+      "../../.venv/bin/python worker.py"
+    ],
+    "starter": "../../.venv/bin/python starter.py",
+    "expect": "claim decision: review",
+    "wait": 5,
+    "cleanup": []
+  },
+  {
+    "dir": "python/11_start_or_attach/solution",
+    "workers": [
+      "../../.venv/bin/python worker.py"
+    ],
+    "starter": "../../.venv/bin/python starter.py",
+    "expect": "second start rejected",
+    "wait": 5,
+    "cleanup": []
+  },
+  {
+    "dir": "python/12_human_in_the_loop/solution",
+    "workers": [
+      "../../.venv/bin/python worker.py"
+    ],
+    "starter": "../../.venv/bin/python starter.py",
+    "expect": "approved by alice",
+    "wait": 5,
+    "cleanup": []
+  },
+  {
+    "dir": "python/13_fan_out_fan_in/solution",
+    "workers": [
+      "../../.venv/bin/python worker.py"
+    ],
+    "starter": "../../.venv/bin/python starter.py",
+    "expect": "shipped o1",
+    "wait": 5,
+    "cleanup": []
+  },
+  {
+    "dir": "python/14_entity_continue_as_new/solution",
+    "workers": [
+      "../../.venv/bin/python worker.py"
+    ],
+    "starter": "../../.venv/bin/python starter.py",
+    "expect": "cart has 7 items after 3 runs",
+    "wait": 5,
+    "cleanup": []
+  },
+  {
+    "dir": "python/15_safe_deploys/solution",
+    "workers": [
+      "../../.venv/bin/python worker.py"
+    ],
+    "starter": "../../.venv/bin/python starter.py",
+    "expect": "baked ticket-Ana",
+    "wait": 5,
+    "cleanup": []
+  },
+  {
+    "dir": "java/09_activity_design/solution",
+    "workers": [
+      "mvn -q compile exec:java@worker"
+    ],
+    "starter": "mvn -q compile exec:java@starter",
+    "expect": "claim decision: review",
+    "wait": 20,
+    "cleanup": []
+  },
+  {
+    "dir": "java/11_start_or_attach/solution",
+    "workers": [
+      "mvn -q compile exec:java@worker"
+    ],
+    "starter": "mvn -q compile exec:java@starter",
+    "expect": "second start rejected",
+    "wait": 20,
+    "cleanup": []
+  },
+  {
+    "dir": "java/12_human_in_the_loop/solution",
+    "workers": [
+      "mvn -q compile exec:java@worker"
+    ],
+    "starter": "mvn -q compile exec:java@starter",
+    "expect": "approved by alice",
+    "wait": 20,
+    "cleanup": []
+  },
+  {
+    "dir": "java/13_fan_out_fan_in/solution",
+    "workers": [
+      "mvn -q compile exec:java@worker"
+    ],
+    "starter": "mvn -q compile exec:java@starter",
+    "expect": "shipped o1",
+    "wait": 20,
+    "cleanup": []
+  },
+  {
+    "dir": "java/14_entity_continue_as_new/solution",
+    "workers": [
+      "mvn -q compile exec:java@worker"
+    ],
+    "starter": "mvn -q compile exec:java@starter",
+    "expect": "cart has 7 items after 3 runs",
+    "wait": 20,
+    "cleanup": []
+  },
+  {
+    "dir": "java/15_safe_deploys/solution",
+    "workers": [
+      "mvn -q compile exec:java@worker"
+    ],
+    "starter": "mvn -q compile exec:java@starter",
+    "expect": "baked ticket-Ana",
+    "wait": 20,
+    "cleanup": []
   }
 ]

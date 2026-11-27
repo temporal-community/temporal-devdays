@@ -20,7 +20,12 @@ The check fails until the TODOs are done.
 A history recorded by the old code (`history_v1.json` / `history-v1.json`) still replays, and a new run does check the stock.
 
 ## Run it live
-No live run for this topic: the check is the exercise.
+Do this after the check passes. Start `temporal server start-dev` in terminal 1, then run these from `java/15_safe_deploys/exercise`:
+```bash
+mvn -q compile exec:java@worker      # terminal 2
+mvn -q compile exec:java@starter      # terminal 3
+```
+The starter shows one order runs through the patched Workflow. You should see `baked ticket-Ana`.
 
 ## Stretch
 Open `workflow_v1.py` / `OrderWorkflowV1Impl.java` and compare it with the new Workflow.

@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import io.temporal.api.enums.v1.EventType;
 import io.temporal.api.history.v1.HistoryEvent;
+import io.temporal.client.BatchRequest;
 import io.temporal.client.WorkflowClient;
 import io.temporal.client.WorkflowOptions;
 import io.temporal.client.WorkflowStub;
@@ -51,6 +52,28 @@ class CartTest {
             CartState result = client.newUntypedWorkflowStub("cart-1").getResult(CartState.class);
             assertEquals(expected, result.items());
             assertTrue(result.runs() >= 2, "TODO 1: continue as new after maxPerRun items, carrying the items forward");
+        } finally {
+            env.close();
+        }
+    }
+
+    @Test
+    void aSignalThatArrivesWithTheStartIsNotLost() throws Exception {
+        TestWorkflowEnvironment env = TestWorkflowEnvironment.newInstance();
+        try {
+            WorkerApp.register(env.newWorker(WorkerApp.TASK_QUEUE));
+            env.start();
+            WorkflowClient client = env.getWorkflowClient();
+            CartWorkflow cart = client.newWorkflowStub(
+                    CartWorkflow.class,
+                    WorkflowOptions.newBuilder().setWorkflowId("cart-2").setTaskQueue(WorkerApp.TASK_QUEUE).build());
+            BatchRequest request = client.newSignalWithStartRequest();
+            request.add(cart::run, new CartState(List.of("a"), 2), 10);
+            request.add(cart::addItem, "b");
+            client.signalWithStart(request);
+            client.newWorkflowStub(CartWorkflow.class, "cart-2").close();
+            CartState result = client.newUntypedWorkflowStub("cart-2").getResult(CartState.class);
+            assertEquals(List.of("a", "b"), result.items(), "messages that arrive before the run starts must be kept");
         } finally {
             env.close();
         }

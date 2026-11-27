@@ -15,4 +15,10 @@ uv run pytest
 ```
 No server needed.
 
-This topic is checked with tests only. There is no live run.
+## Run it live
+Start the dev server first: `temporal server start-dev` (Web UI at http://localhost:8233). Then, from `python/13_fan_out_fan_in/solution`:
+```bash
+uv run python worker.py      # terminal 2
+uv run python starter.py      # terminal 3
+```
+The starter shows three items are made in parallel and a child Workflow ships the order. You should see `shipped o1`.

@@ -12,7 +12,7 @@ public class CartWorkflowImpl implements CartWorkflow {
 
     @Override
     public CartState run(CartState state, int maxPerRun) {
-        items.addAll(state.items());
+        items.addAll(0, state.items());   // signals can arrive before run starts
         runs = state.runs();
         Workflow.await(() -> added >= maxPerRun || closed);
         if (closed) {

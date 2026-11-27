@@ -21,7 +21,12 @@ The check fails until the TODOs are done.
 A second start of the same transfer is rejected, and two `add_item` calls on one order give one Workflow holding both items.
 
 ## Run it live
-No live run for this topic: the check is the exercise.
+Do this after the check passes. Start `temporal server start-dev` in terminal 1, then run these from `java/11_start_or_attach/exercise`:
+```bash
+mvn -q compile exec:java@worker      # terminal 2
+mvn -q compile exec:java@starter      # terminal 3
+```
+The starter shows a second start of the same transfer is rejected, and two `add_item` calls reach one order. You should see `second start rejected`.
 
 ## Stretch
 Start the same transfer a third time and read the error you get.

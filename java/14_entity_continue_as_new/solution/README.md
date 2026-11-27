@@ -15,4 +15,10 @@ mvn test
 ```
 No server needed.
 
-This topic is checked with tests only. There is no live run.
+## Run it live
+Start the dev server first: `temporal server start-dev` (Web UI at http://localhost:8233). Then, from `java/14_entity_continue_as_new/solution`:
+```bash
+mvn -q compile exec:java@worker      # terminal 2
+mvn -q compile exec:java@starter      # terminal 3
+```
+The starter shows a cart receives 7 items and continues as new every 3, keeping every item. You should see `cart has 7 items after 3 runs`.

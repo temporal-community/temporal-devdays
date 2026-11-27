@@ -21,7 +21,12 @@ The check fails until the TODOs are done.
 More than one item is made at once, and the history shows a child Workflow with the id `ship-o1`.
 
 ## Run it live
-No live run for this topic: the check is the exercise.
+Do this after the check passes. Start `temporal server start-dev` in terminal 1, then run these from `python/13_fan_out_fan_in/exercise`:
+```bash
+uv run python worker.py      # terminal 2
+uv run python starter.py      # terminal 3
+```
+The starter shows three items are made in parallel and a child Workflow ships the order. You should see `shipped o1`.
 
 ## Stretch
 Add a fourth item and check that the time barely changes.
