@@ -50,7 +50,7 @@ public class Timeline {
 
     static Map<String, Object> step(String kind, String name, String service, String detail, boolean undo) {
         return map("kind", kind, "name", name, "service", service, "status", "running", "attempt", 1,
-            "detail", detail, "undo", undo, "worker", "", "language", "");
+            "detail", detail, "item", "", "undo", undo, "worker", "", "language", "");
     }
 
     record Read(List<Map<String, Object>> steps, Long timer) {}
@@ -64,10 +64,11 @@ public class Timeline {
             switch (e.getEventType()) {
                 case EVENT_TYPE_ACTIVITY_TASK_SCHEDULED -> {
                     var a = e.getActivityTaskScheduledEventAttributes();
-                    String item = a.getInput().getPayloadsCount() > 1  // ship_item(order_id, item, scenario)
-                        ? a.getInput().getPayloads(1).getData().toStringUtf8().replace("\"", "") : "";
                     Map<String, Object> s = step("activity", a.getActivityType().getName(), a.getTaskQueue().getName(),
-                        item, UNDO.contains(a.getActivityType().getName()));
+                        "", UNDO.contains(a.getActivityType().getName()));
+                    if (a.getInput().getPayloadsCount() > 1) {  // ship_item(order_id, item, scenario)
+                        s.put("item", a.getInput().getPayloads(1).getData().toStringUtf8().replace("\"", ""));
+                    }
                     byEvent.put(e.getEventId(), s);
                     s.put("activity_id", a.getActivityId());  // used to match pending Activities, removed below
                     steps.add(s);

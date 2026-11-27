@@ -1,247 +1,383 @@
 <!doctype html>
 <html lang="en">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Order management demo</title>
 <style>
   :root {
-    --bg: #f8fafc; --card: #fff; --fg: #0f172a; --muted: #475569; --border: #cbd5e1;
-    --accent: #15803d; --on-accent: #fff; --danger: #b91c1c; --warn: #b45309; --ring: #1d4ed8;
-    --font: system-ui, -apple-system, "Segoe UI", sans-serif;
-    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --sans: "Avenir Next", "Segoe UI", "Helvetica Neue", system-ui, sans-serif;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    --bg: #f3f0e8; --panel: #fffefb; --ink: #1b2027; --muted: #586170; --line: #d8d2c4; --strip: #f8f6f0;
+    --accent: #17544f; --on-accent: #ffffff; --focus: #1b6ec2;
+    --done: #1d6b3f;  --done-bg: #e2f1e7;
+    --run: #17559c;   --run-bg: #e1edfa;
+    --retry: #8a4b00; --retry-bg: #fbebd0;
+    --wait: #5b3aa8;  --wait-bg: #ece6f8;
+    --fail: #a3231b;  --fail-bg: #fae3e0;
+    --undo: #3d4651;  --undo-bg: #e8e6e0;
   }
   @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #0f172a; --card: #1b2336; --fg: #f8fafc; --muted: #a3b1c6; --border: #475569;
-      --accent: #22c55e; --on-accent: #0f172a; --danger: #f87171; --warn: #fbbf24; --ring: #93c5fd;
+    :root:not([data-theme="light"]) {
+      --bg: #0e1319; --panel: #151c24; --ink: #e7ebf0; --muted: #9aa5b3; --line: #2a3440; --strip: #121921;
+      --accent: #5fd0c3; --on-accent: #04201d; --focus: #8ec1ff;
+      --done: #7fd6a0; --done-bg: #153424; --run: #8ec1ff; --run-bg: #14304f;
+      --retry: #ffc36b; --retry-bg: #3b2a0c; --wait: #c3a9ff; --wait-bg: #2a2050;
+      --fail: #ff9b92; --fail-bg: #4a1b18; --undo: #b4bdc8; --undo-bg: #232b35;
     }
   }
-  * { box-sizing: border-box; }
-  html, body { height: 100%; margin: 0; overflow: hidden; }
-  body { background: var(--bg); color: var(--fg); font: 15px/1.45 var(--font); display: flex; flex-direction: column; }
-
-  header { flex: none; display: flex; justify-content: space-between; align-items: baseline; gap: 1rem;
-    padding: .75rem 1rem; border-bottom: 1px solid var(--border); }
-  h1 { font-size: 1.15rem; margin: 0; }
-  h2 { font-size: .8rem; margin: 0 0 .75rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
-  a { color: var(--ring); }
-
-  main { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
-    gap: 1rem; padding: 1rem; max-width: 70rem; width: 100%; margin: 0 auto; }
-  .card { min-height: 0; overflow: auto; display: flex; flex-direction: column;
-    background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; }
-
-  fieldset { border: 0; padding: 0; margin: 0; }
-  legend { font-weight: 600; margin-bottom: .5rem; padding: 0; }
-  .choices { display: grid; gap: .5rem; grid-template-columns: 1fr 1fr; }
-  .choice { position: relative; }
-  .choice:last-child:nth-child(odd) { grid-column: 1 / -1; }
-  .choice input { position: absolute; opacity: 0; inset: 0; cursor: pointer; margin: 0; }
-  .choice span { display: block; height: 100%; padding: .6rem .7rem; border: 1px solid var(--border); border-radius: 10px; }
-  .choice b { display: block; }
-  .choice small { color: var(--muted); display: block; line-height: 1.3; }
-  .choice input:checked + span { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
-  .choice input:focus-visible + span { outline: 3px solid var(--ring); outline-offset: 2px; }
-
-  label.field { display: block; font-weight: 600; }
-  input[type=text] { width: 100%; min-height: 44px; margin-top: .25rem; padding: .5rem .75rem; font: inherit;
-    color: var(--fg); background: var(--bg); border: 1px solid var(--border); border-radius: 8px; }
-  button { min-height: 44px; padding: .5rem 1rem; font: inherit; font-weight: 600; cursor: pointer;
-    color: var(--fg); background: transparent; border: 1px solid var(--border); border-radius: 8px;
-    transition: background-color .15s, border-color .15s; }
-  button:hover:not(:disabled) { border-color: var(--fg); }
-  button.primary { color: var(--on-accent); background: var(--accent); border-color: var(--accent); width: 100%; }
-  button:disabled, input:disabled { opacity: .5; cursor: not-allowed; }
-  :focus-visible { outline: 3px solid var(--ring); outline-offset: 2px; }
-  .gap { margin-top: .75rem; }
-  .push { margin-top: auto; padding-top: .75rem; }
-
-  .empty { margin: auto; text-align: center; color: var(--muted); max-width: 18rem; }
-  .meta { display: flex; justify-content: space-between; align-items: center; gap: .5rem; flex-wrap: wrap; color: var(--muted); }
-  .meta code { font-family: var(--mono); color: var(--fg); }
-  .badge { font-family: var(--mono); font-size: .8rem; padding: .1rem .5rem; border: 1px solid var(--border); border-radius: 999px; }
-
-  ol.steps { list-style: none; margin: 1rem 0; padding: 0; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; }
-  ol.steps li { position: relative; display: flex; flex-direction: column; align-items: center; gap: .35rem;
-    text-align: center; font-size: .8rem; line-height: 1.25; color: var(--muted); padding: 0 .15rem; }
-  ol.steps li + li::before { content: ""; position: absolute; top: .75rem; right: 50%; width: 100%; height: 2px; background: var(--border); z-index: 0; }
-  ol.steps li.done::before, ol.steps li.current::before, ol.steps li.waiting::before, ol.steps li.failed::before { background: var(--accent); }
-  .dot { position: relative; z-index: 1; width: 1.5rem; height: 1.5rem; border-radius: 50%; border: 2px solid var(--border);
-    background: var(--card); display: grid; place-items: center; }
-  .dot svg { width: .9rem; height: .9rem; display: none; }
-  li.done { color: var(--fg); }
-  li.done .dot { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
-  li.done .ok { display: block; }
-  li.current { color: var(--fg); font-weight: 600; }
-  li.current .dot { border-color: var(--accent); animation: pulse 1.4s ease-in-out infinite; }
-  li.failed { color: var(--danger); font-weight: 600; }
-  li.failed::before { background: var(--danger) !important; }
-  li.failed .dot { border-color: var(--danger); color: var(--danger); }
-  li.failed .bad { display: block; }
-  li.waiting { color: var(--warn); font-weight: 600; }
-  li.waiting .dot { border-color: var(--warn); animation: pulse 1.4s ease-in-out infinite; }
-  @keyframes pulse { 50% { box-shadow: 0 0 0 5px transparent; } 0%, 100% { box-shadow: 0 0 0 0 var(--accent); } }
-  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
-
-  .banner { padding: .5rem .75rem; border-radius: 8px; border: 1px solid var(--border); margin: 0; }
-  .banner.good { border-color: var(--accent); }
-  .banner.bad { border-color: var(--danger); }
-  .actions { display: grid; gap: .5rem; }
-  .addr { display: grid; grid-template-columns: 1fr auto; gap: .5rem; }
-  .msg { min-height: 1.4rem; margin: .4rem 0 0; color: var(--muted); }
+  :root[data-theme="dark"] {
+    --bg: #0e1319; --panel: #151c24; --ink: #e7ebf0; --muted: #9aa5b3; --line: #2a3440; --strip: #121921;
+    --accent: #5fd0c3; --on-accent: #04201d; --focus: #8ec1ff;
+    --done: #7fd6a0; --done-bg: #153424; --run: #8ec1ff; --run-bg: #14304f;
+    --retry: #ffc36b; --retry-bg: #3b2a0c; --wait: #c3a9ff; --wait-bg: #2a2050;
+    --fail: #ff9b92; --fail-bg: #4a1b18; --undo: #b4bdc8; --undo-bg: #232b35;
+  }
+  * { box-sizing: border-box; margin: 0; }
   [hidden] { display: none !important; }
+  html, body { height: 100%; }
+  body { font: 14px/1.45 var(--sans); background: var(--bg); color: var(--ink); display: flex; flex-direction: column; overflow: hidden; }
+  button, input { font: inherit; color: inherit; }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+  a { color: var(--accent); }
+  .mono { font-family: var(--mono); }
+  svg.ic { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
-  @media (max-width: 760px) {
-    main { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); gap: .5rem; padding: .5rem; }
-    header { padding: .5rem .75rem; }
-    .choice small { display: none; }
-    .choice span { padding: .5rem .6rem; }
-    .card { padding: .75rem; }
-    h2 { margin-bottom: .4rem; }
-    legend { position: absolute; left: -9999px; }
-    .meta + ol.steps { margin: .6rem 0; }
-    .msg { min-height: 1.2rem; }
-    ol.steps li { font-size: .7rem; }
+  .bar { display: flex; align-items: center; gap: 16px; padding: 8px 16px; border-bottom: 1px solid var(--line); background: var(--panel); flex-wrap: wrap; }
+  .brand { display: flex; align-items: baseline; gap: 10px; margin-right: auto; }
+  h1 { font-size: 17px; letter-spacing: .01em; }
+  .sub { color: var(--muted); font-size: 12px; }
+  .services { display: flex; gap: 8px; flex-wrap: wrap; }
+  .svc { display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border: 1px solid var(--line); border-radius: 999px; white-space: nowrap; font-size: 12px; }
+  .svc .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--done); }
+  .svc .state { color: var(--muted); }
+  .svc.down { border-color: var(--fail); color: var(--fail); }
+  .svc.down .dot { background: var(--fail); }
+  .svc.down .state { color: var(--fail); }
+  .lang { flex: none; font: 600 10px/1 var(--mono); text-transform: uppercase; padding: 2px 5px; border-radius: 4px; background: var(--undo-bg); color: var(--undo); }
+  .tools { display: flex; align-items: center; gap: 10px; font-size: 12px; }
+  .live { color: var(--muted); white-space: nowrap; }
+  .live.stale { color: var(--fail); }
+  .quiet { min-height: 32px; padding: 4px 10px; border: 1px solid var(--line); border-radius: 8px; background: transparent; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; color: var(--ink); }
+  .quiet:hover { border-color: var(--accent); }
+
+  main { flex: 1; min-height: 0; display: grid; grid-template-columns: 330px minmax(0, 1fr); gap: 12px; padding: 12px 16px; }
+  .panel { min-width: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px; min-height: 0; display: flex; flex-direction: column; gap: 10px; }
+  h2 { font-size: 11px; text-transform: uppercase; letter-spacing: .09em; color: var(--muted); }
+
+  .choices { display: grid; gap: 6px; }
+  .choice { display: block; cursor: pointer; position: relative; }
+  .choice input { position: absolute; opacity: 0; }
+  .choice span { display: block; padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px; }
+  .choice b { display: block; font-size: 13px; }
+  .choice small { display: block; color: var(--muted); font-size: 12px; }
+  .choice input:checked + span { border-color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); background: var(--strip); }
+  .choice input:focus-visible + span { outline: 3px solid var(--focus); outline-offset: 2px; }
+  .field { display: flex; gap: 6px; }
+  input[type=text] { flex: 1; min-width: 0; min-height: 36px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tag { min-height: 28px; padding: 2px 9px; border: 1px dashed var(--line); border-radius: 999px; background: transparent; cursor: pointer; font-size: 12px; color: var(--muted); }
+  .tag:hover { border-color: var(--accent); color: var(--ink); }
+  .primary { min-height: 40px; padding: 8px 14px; border: 0; border-radius: 8px; background: var(--accent); color: var(--on-accent); font-weight: 600; cursor: pointer; }
+  .primary:disabled, .quiet:disabled { opacity: .45; cursor: not-allowed; }
+
+  .recent { list-style: none; padding: 0; display: grid; gap: 4px; overflow: auto; min-height: 0; }
+  .rec { width: 100%; min-height: 36px; display: flex; align-items: center; gap: 8px; padding: 4px 8px; border: 1px solid transparent; border-radius: 8px; background: transparent; cursor: pointer; text-align: left; }
+  .rec:hover { background: var(--strip); }
+  .rec[aria-current=true] { border-color: var(--accent); }
+  .rec .nm { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pill { font-size: 11px; padding: 1px 7px; border-radius: 999px; border: 1px solid var(--c, var(--line)); color: var(--c, var(--muted)); background: var(--b, transparent); white-space: nowrap; }
+
+  .head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .head .links { margin-left: auto; display: flex; gap: 12px; font-size: 12px; }
+  .head .links a { display: inline-flex; align-items: center; gap: 4px; }
+  .narration { min-height: 40px; padding: 8px 12px; border-radius: 8px; background: var(--strip); border-left: 4px solid var(--c, var(--line)); }
+  .empty { margin: auto; max-width: 52ch; text-align: center; color: var(--muted); }
+
+  .lanes { flex: 1; min-height: 0; overflow: auto; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: min-content; row-gap: 6px; align-content: start;
+           background: linear-gradient(90deg, var(--strip) 25%, transparent 25% 50%, var(--strip) 50% 75%, transparent 75%); border: 1px solid var(--line); border-radius: 10px; padding-bottom: 8px; }
+  .lane-head { position: sticky; top: 0; z-index: 1; padding: 6px 10px; background: var(--panel); border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .lane-head .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--done); }
+  .lane-head.down .dot { background: var(--fail); }
+  .lane-head small { color: var(--muted); font-weight: 400; overflow: hidden; text-overflow: ellipsis; }
+  .chip { --c: var(--run); --b: var(--run-bg); align-self: start; margin: 0 6px; min-width: 0; display: flex; align-items: center; gap: 7px; padding: 5px 8px; text-align: left; cursor: pointer;
+          border: 1px solid var(--c); border-radius: 8px; background: var(--b); color: var(--c); transition: background-color .2s, border-color .2s, color .2s; }
+  .chip .txt { min-width: 0; display: flex; flex-direction: column; }
+  .chip .nm { font-weight: 600; display: flex; align-items: center; gap: 6px; min-width: 0; }
+  .chip .nm .t { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chip .nm .lang { flex: none; }
+  .chip .meta { font: 11px/1.3 var(--mono); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chip.done { --c: var(--done); --b: var(--done-bg); }
+  .chip.retrying { --c: var(--retry); --b: var(--retry-bg); }
+  .chip.waiting { --c: var(--wait); --b: var(--wait-bg); }
+  .chip.failed { --c: var(--fail); --b: var(--fail-bg); }
+  .chip.undo { --c: var(--undo); border-style: dashed; background: repeating-linear-gradient(135deg, var(--undo-bg) 0 6px, transparent 6px 12px); }
+  .chip.running .ic, .chip.waiting .ic { animation: pulse 1.4s ease-in-out infinite; }
+  .chip.selected { box-shadow: 0 0 0 2px var(--focus); }
+  .items { margin: 0 6px; display: grid; gap: 4px; }
+  .items .chip { margin: 0; padding: 3px 7px; cursor: default; }
+  @keyframes pulse { 50% { opacity: .35; } }
+
+  .detail { min-height: 20px; font: 12px/1.4 var(--mono); color: var(--muted); }
+  .legend { display: flex; gap: 8px; flex-wrap: wrap; font-size: 11px; color: var(--muted); }
+  .actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding-top: 8px; border-top: 1px solid var(--line); }
+  .actions .field { flex: 1; min-width: 260px; }
+  .countdown { font: 12px var(--mono); color: var(--wait); min-width: 14ch; }
+
+  @media (max-width: 1100px) { main { grid-template-columns: 280px minmax(0, 1fr); } }
+  @media (max-width: 900px) {
+    body { overflow: auto; height: auto; min-height: 100%; }
+    main { grid-template-columns: minmax(0, 1fr); }
+    .lanes { max-height: 60vh; flex: none; }
+  }
+  @media (max-width: 640px) {
+    .lanes { grid-template-columns: 1fr; background: none; }
+    .lane-head { display: none; }
+    .chip, .items { grid-column: 1 !important; grid-row: auto !important; }
+    .chip .meta::before { content: attr(data-svc) " · "; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .chip, .chip .ic { transition: none; animation: none !important; }
   }
 </style>
+</head>
+<body>
 
-<header>
-  <h1>Order management</h1>
-  <a href="http://localhost:8233" target="_blank" rel="noopener">Temporal Web UI</a>
+<header class="bar">
+  <div class="brand"><h1>Order management</h1><span class="sub">durable execution across four services</span></div>
+  <div class="services" id="services" role="group" aria-label="Services"></div>
+  <div class="tools">
+    <span class="live" id="live">connecting…</span>
+    <button class="quiet" id="pause" aria-pressed="false">Pause</button>
+    <a class="quiet" href="http://localhost:8233" target="_blank" rel="noopener">Temporal Web UI <svg class="ic" aria-hidden="true"><use href="#i-link"/></svg></a>
+    <button class="quiet" id="theme" aria-label="Switch light and dark theme"></button>
+  </div>
 </header>
 
 <main>
-  <section class="card" aria-labelledby="new">
+  <section class="panel" aria-labelledby="new">
     <h2 id="new">Place an order</h2>
-    <fieldset>
-      <legend>Scenario</legend>
-      <div class="choices">
-        <label class="choice"><input type="radio" name="scenario" value="happy" checked>
-          <span><b>Happy path</b><small>Everything works. A child Workflow ships.</small></span></label>
-        <label class="choice"><input type="radio" name="scenario" value="flaky_card">
-          <span><b>Flaky card</b><small>Charge fails twice, a retry succeeds.</small></span></label>
-        <label class="choice"><input type="radio" name="scenario" value="bad_card">
-          <span><b>Bad card</b><small>Fails at once, stock is released.</small></span></label>
-        <label class="choice"><input type="radio" name="scenario" value="approval">
-          <span><b>Needs approval</b><small>Waits for you: Signal and Update.</small></span></label>
-        <label class="choice"><input type="radio" name="scenario" value="ship_fails">
-          <span><b>Shipping fails</b><small>Card is charged, then undone: refund, release stock.</small></span></label>
-      </div>
-    </fieldset>
-    <label class="field gap" for="address">Shipping address</label>
-    <input type="text" id="address" value="1 Main St, Redwood" autocomplete="off">
-    <div class="push"><button class="primary" id="place" onclick="start()">Place order</button></div>
+    <div class="choices" id="scenarios" role="radiogroup" aria-label="Scenario"></div>
+    <div class="field"><input type="text" id="address" value="12 Main Street" autocomplete="off" aria-label="Shipping address"></div>
+    <button class="primary" id="place">Place order</button>
+    <h2>Recent orders</h2>
+    <ul class="recent" id="recent"></ul>
   </section>
 
-  <section class="card" aria-labelledby="track">
-    <h2 id="track">Live order</h2>
-    <p class="empty" id="empty">Place an order and its steps appear here, step by step.</p>
-
-    <div id="run" hidden style="display:flex;flex-direction:column;flex:1;min-height:0">
-      <div class="meta">
-        <span>Order <code id="oid"></code> <span class="badge" id="state"></span></span>
-        <a id="webui" href="#" target="_blank" rel="noopener">Open in Web UI</a>
+  <section class="panel" aria-labelledby="live-order">
+    <h2 id="live-order">Live order</h2>
+    <p class="empty" id="empty">Pick a scenario and place an order. Each step appears in the lane of the service that ran it, with retries, undo steps and who ran it.</p>
+    <div id="run" style="display:none;flex-direction:column;gap:10px;flex:1;min-height:0">
+      <div class="head">
+        <span class="mono" id="oid"></span><span class="pill" id="state"></span>
+        <span class="links">
+          <a id="orderlink" href="#" target="_blank" rel="noopener">Order in Web UI <svg class="ic" aria-hidden="true"><use href="#i-link"/></svg></a>
+          <a id="childlink" href="#" target="_blank" rel="noopener" hidden>Shipment in Web UI <svg class="ic" aria-hidden="true"><use href="#i-link"/></svg></a>
+        </span>
       </div>
-      <ol class="steps" id="steps" aria-label="Order steps"></ol>
-      <p class="banner" id="result" role="status" hidden></p>
-      <p class="meta" style="justify-content:flex-start">Ship to&nbsp;<code id="ship"></code></p>
-
-      <div class="push">
-        <h2>Talk to the running Workflow</h2>
-        <div class="actions">
-          <button id="approve" onclick="approve()">Approve (Signal)</button>
-          <label class="field" for="newaddr" style="margin-bottom:-.25rem">New address (Update)</label>
-          <div class="addr">
-            <input type="text" id="newaddr" autocomplete="off" aria-describedby="msg" style="margin-top:0">
-            <button id="change" onclick="changeAddress()">Change</button>
-          </div>
+      <p class="narration" id="narration" role="status" aria-atomic="true"></p>
+      <div class="lanes" id="lanes" role="group" aria-label="Steps by service"></div>
+      <p class="detail" id="detail">Select a step to see its details.</p>
+      <div class="legend" id="legend"></div>
+      <div class="actions">
+        <button class="quiet" id="approve">Approve (Signal)</button>
+        <span class="countdown" id="countdown"></span>
+        <div class="field">
+          <input type="text" id="newaddr" placeholder="New address (Update)" aria-label="New address" autocomplete="off">
+          <button class="quiet" id="change">Change</button>
         </div>
-        <p class="msg" id="msg" role="status"></p>
+        <div class="chips" id="addrchips"></div>
+        <span id="msg" role="status" class="sub"></span>
       </div>
     </div>
   </section>
 </main>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <symbol id="i-ok" viewBox="0 0 16 16"><path d="M3 8.5l3.2 3L13 4.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
-  <symbol id="i-bad" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+  <symbol id="i-done" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol>
+  <symbol id="i-failed" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
+  <symbol id="i-undo" viewBox="0 0 24 24"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/></symbol>
+  <symbol id="i-waiting" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+  <symbol id="i-retrying" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M8 16H3v5"/></symbol>
+  <symbol id="i-running" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/></symbol>
+  <symbol id="i-signal" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></symbol>
+  <symbol id="i-update" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></symbol>
+  <symbol id="i-child" viewBox="0 0 24 24"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
 </svg>
 
 <script>
-const STEPS = [
-  ["checking stock", "Check stock"],
-  ["reserving stock", "Reserve stock"],
-  ["waiting for approval", "Approval"],
-  ["charging card", "Charge card"],
-  ["shipping", "Ship (child)"],
+const LANES = ["orders", "inventory", "payments", "shipping"];
+const MAX_ATTEMPTS = 5;   // the Retry Policy in the Workflow
+const SCENARIOS = [
+  ["happy", "Happy path", "Four services, no service calls another."],
+  ["flaky_card", "Flaky card", "The charge fails twice. Temporal retries it."],
+  ["bad_card", "Bad card", "A final error. Undo runs, the refund is a safe no-op."],
+  ["approval", "Needs approval", "Waits for a person. A Signal and an Update."],
+  ["ship_fails", "Shipping fails", "A child Workflow fails. Undo runs in reverse."],
 ];
-let id = null, timer = null, lastIdx = 0, needsApproval = false;
+const LABEL = { done: "done", running: "running", retrying: "retrying", waiting: "waiting for a Worker", failed: "failed" };
+const TONE = { done: "done", running: "run", retrying: "retry", waiting: "wait", failed: "fail" };
 const $ = (x) => document.getElementById(x);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const post = (url, body) => fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body || {}) });
+const get = async (url) => { const r = await fetch(url); if (!r.ok) throw new Error(url); return r.json(); };
+const short = (l) => (l === "python" ? "py" : "java");
+let id = null, view = null, info = null, services = [], paused = false, lastOk = 0, selected = null;
 
-function render(s) {
-  const list = STEPS.filter(([key]) => needsApproval || key !== "waiting for approval");
-  const idx = list.findIndex(([key]) => key === s.step);
-  if (idx >= 0) lastIdx = idx;
-  const cancelled = s.step === "cancelled" || s.step === "cancelling";
-  const finished = s.step === "done";
-  if (cancelled) {
-    const why = s.result || "";
-    const failKey = why.includes("approval") ? "waiting for approval" : why.includes("shipping") ? "shipping" : "charging card";
-    lastIdx = list.findIndex(([key]) => key === failKey);
-  }
-  $("steps").innerHTML = list.map(([key, label], i) => {
-    let cls = "";
-    if (finished || i < lastIdx) cls = "done";
-    else if (cancelled && i === lastIdx) cls = "failed";
-    else if (i === lastIdx) cls = key === "waiting for approval" ? "waiting" : "current";
-    const aria = cls === "current" || cls === "waiting" ? ' aria-current="step"' : "";
-    return `<li class="${cls}"${aria}><span class="dot"><svg class="ok"><use href="#i-ok"/></svg><svg class="bad"><use href="#i-bad"/></svg></span>${label}</li>`;
+function icon(name) { return `<svg class="ic" aria-hidden="true"><use href="#i-${name}"/></svg>`; }
+function stepIcon(s) { return s.undo ? "undo" : ["signal", "update", "child"].includes(s.kind) ? s.kind : s.status; }
+function meta(s) {
+  if (s.status === "retrying") return `attempt ${s.attempt} of ${MAX_ATTEMPTS}`;
+  const base = s.undo ? "undo · " + LABEL[s.status] : s.kind === "signal" || s.kind === "update" ? s.kind : LABEL[s.status];
+  return s.attempt > 1 ? `${base} · attempt ${s.attempt}` : base;
+}
+function chip(s, i) {
+  const full = `${s.name}, ${s.service}${s.language ? ", " + s.language : ""}, ${meta(s)}${s.detail ? ": " + s.detail : ""}`;
+  const lang = s.language ? ` <span class="lang">${short(s.language)}</span>` : "";
+  return `<button class="chip ${s.status}${s.undo ? " undo" : ""}${selected === i ? " selected" : ""}" data-i="${i}" style="grid-column:${LANES.indexOf(s.service) + 1};grid-row:${i + 2}" aria-label="${esc(full)}">`
+    + `${icon(stepIcon(s))}<span class="txt"><span class="nm"><span class="t">${esc(s.name)}</span>${lang}</span><span class="meta" data-svc="${s.service}">${esc(meta(s))}</span></span></button>`;
+}
+function items(list) {
+  return list.map((s) => `<span class="chip ${s.status}">${icon(stepIcon(s))}<span class="txt"><span class="nm"><span class="t">${esc(s.item)}</span></span><span class="meta">${esc(meta(s) + (s.status === "failed" && s.detail ? " · " + s.detail : ""))}</span></span></span>`).join("");
+}
+
+function renderServices() {
+  const waiting = new Set((view ? view.steps : []).filter((s) => s.status === "waiting").map((s) => s.service));
+  $("services").innerHTML = services.map((s) => {
+    const down = !s.up || waiting.has(s.name);
+    const state = waiting.has(s.name) ? "no Worker" : s.up ? "up" : "no Worker";
+    return `<span class="svc${down ? " down" : ""}"><span class="dot"></span>${s.name}`
+      + (s.language ? ` <span class="lang">${short(s.language)}</span>` : "") + ` <span class="state">${state}</span></span>`;
   }).join("");
-  $("state").textContent = s.state.toLowerCase();
-  $("ship").textContent = s.address;
-  const running = s.state === "RUNNING";
-  $("approve").disabled = !(running && s.step === "waiting for approval");
-  $("change").disabled = !running;
-  $("newaddr").disabled = !running;
-  const r = $("result");
-  if (s.result) {
-    const ok = s.result === "shipped";
-    r.hidden = false; r.className = "banner " + (ok ? "good" : "bad");
-    r.textContent = ok ? "Shipped. The order is complete." : "Order " + s.result + ".";
-  }
 }
 
-async function poll() {
-  const r = await fetch("/status/" + id);
-  if (!r.ok) return;
-  const s = await r.json();
-  render(s);
-  if (s.state !== "RUNNING") clearInterval(timer);
+function renderLanes() {
+  const down = new Set(services.filter((s) => !s.up).map((s) => s.name));
+  const heads = LANES.map((q, c) => {
+    const sv = services.find((s) => s.name === q) || {};
+    return `<div class="lane-head${down.has(q) ? " down" : ""}" style="grid-column:${c + 1};grid-row:1"><span class="dot"></span>${q}<small>${sv.language || ""}</small></div>`;
+  }).join("");
+  const rows = view.steps.map((s, i) => chip(s, i) + (s.kind === "child" ? `<div class="items" style="grid-column:4;grid-row:${i + 2}">${items(s.items)}</div>` : "")).join("");
+  $("lanes").innerHTML = heads + rows;
 }
 
+function narrate() {
+  const steps = view.steps, bad = steps.find((s) => ["waiting", "retrying"].includes(s.status));
+  const failed = steps.find((s) => s.status === "failed" && !s.undo);
+  let text = "", tone = "run";
+  if (bad && bad.status === "waiting") { text = `${bad.name} is waiting: no Worker is listening on ${bad.service}. Start that service and this order carries on.`; tone = "wait"; }
+  else if (bad) { text = `${bad.name} failed: ${bad.detail}. Temporal retries it for you, attempt ${bad.attempt} of ${MAX_ATTEMPTS}.`; tone = "retry"; }
+  else if (info && info.state === "COMPLETED") {
+    const undo = steps.filter((s) => s.undo).map((s) => s.name), ok = info.result === "shipped";
+    text = ok ? "Order shipped. Every step finished." : `Order ${info.result}.` + (undo.length ? ` Undo ran in reverse: ${undo.join(", then ")}.` : "");
+    tone = ok ? "done" : "fail";
+  } else if (info && info.step === "waiting for approval") { text = "Waiting for a person to approve. The Workflow holds no thread while it waits."; tone = "wait"; }
+  else if (failed) { text = `${failed.name} failed for good. The Workflow now undoes the earlier steps.`; tone = "fail"; }
+  else { text = info ? `Now: ${info.step}.` : "Starting…"; }
+  $("narration").textContent = text;
+  $("narration").style.setProperty("--c", `var(--${tone})`);
+}
+
+function render() {
+  if (!view || !info) return;
+  $("run").style.display = "flex"; $("empty").hidden = true;
+  $("oid").textContent = "order-" + id;
+  const p = $("state"), tone = info.state === "RUNNING" ? "run" : info.result === "shipped" ? "done" : "fail";
+  p.textContent = info.state.toLowerCase();
+  p.style.setProperty("--c", `var(--${tone})`); p.style.setProperty("--b", `var(--${tone}-bg)`);
+  $("orderlink").href = "http://localhost:8233/namespaces/default/workflows/order-" + id;
+  const child = view.steps.find((s) => s.kind === "child");
+  $("childlink").hidden = !child;
+  if (child) $("childlink").href = "http://localhost:8233/namespaces/default/workflows/" + child.detail;
+  renderLanes(); renderServices(); narrate();
+  const running = info.state === "RUNNING";
+  $("approve").disabled = !(running && info.step === "waiting for approval");
+  $("change").disabled = !running; $("newaddr").disabled = !running;
+  tickCountdown();
+}
+
+function tickCountdown() {
+  const end = view && view.countdown_ends, left = end ? Math.max(0, end - Date.now() / 1000) : 0;
+  $("countdown").textContent = end ? `times out in ${Math.floor(left / 60)}:${String(Math.floor(left % 60)).padStart(2, "0")}` : "";
+  const age = Math.round((Date.now() - lastOk) / 1000), live = $("live");
+  live.className = "live" + (lastOk && age > 4 && !paused ? " stale" : "");
+  live.textContent = paused ? "paused" : !lastOk ? "connecting…" : age > 4 ? `stale: no answer for ${age}s` : `live · updated ${age}s ago`;
+}
+
+async function pollOrder() {
+  if (!id || paused) return;
+  try {
+    const [i, v] = await Promise.all([get("/status/" + id), get("/timeline/" + id)]);
+    info = i; view = v; lastOk = Date.now(); render();
+  } catch (e) { /* the live label shows it is stale */ }
+}
+async function pollSide() {
+  if (paused) return;
+  try {
+    [services] = await Promise.all([get("/services"), loadRecent()]);
+    lastOk = Date.now(); renderServices(); if (view) renderLanes();
+  } catch (e) { /* the live label shows it is stale */ }
+}
+async function loadRecent() {
+  const list = await get("/orders"), name = Object.fromEntries(SCENARIOS.map((s) => [s[0], s[1]]));
+  $("recent").innerHTML = list.map((o) => {
+    const t = o.state === "RUNNING" ? "run" : o.state === "COMPLETED" ? "done" : "fail";
+    return `<li><button class="rec" data-id="${esc(o.id)}"${o.id === id ? ' aria-current="true"' : ""}><span class="mono">${esc(o.id)}</span><span class="nm">${esc(name[o.scenario] || o.scenario)}</span><span class="pill" style="--c:var(--${t});--b:var(--${t}-bg)">${o.state.toLowerCase()}</span></button></li>`;
+  }).join("") || '<li class="sub" style="padding:4px 8px">No orders yet.</li>';
+}
+
+function open(orderId) {
+  id = orderId; view = null; info = null; selected = null;
+  history.replaceState(null, "", "?order=" + id);
+  $("msg").textContent = ""; $("newaddr").value = ""; $("detail").textContent = "Select a step to see its details.";
+  pollOrder();
+}
 async function start() {
   $("place").disabled = true;
   const scenario = document.querySelector("[name=scenario]:checked").value;
-  const r = await post("/start", { scenario, address: $("address").value });
-  id = (await r.json()).order_id; lastIdx = 0; needsApproval = scenario === "approval";
-  $("place").disabled = false;
-  $("oid").textContent = id;
-  $("webui").href = "http://localhost:8233/namespaces/default/workflows/order-" + id;
-  $("result").hidden = true; $("msg").textContent = ""; $("newaddr").value = "";
-  $("empty").hidden = true; $("run").hidden = false;
-  clearInterval(timer); timer = setInterval(poll, 700); poll();
+  try { open((await (await post("/start", { scenario, address: $("address").value })).json()).order_id); }
+  finally { $("place").disabled = false; }
+  if (matchMedia("(max-width: 900px)").matches) $("live-order").scrollIntoView();   // on a phone the order sits below the form
+  loadRecent();
+}
+const isDark = () => document.documentElement.dataset.theme ? document.documentElement.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+function setTheme(t) {
+  if (t) document.documentElement.dataset.theme = t;
+  $("theme").innerHTML = icon(isDark() ? "sun" : "moon");
 }
 
-async function approve() {
-  await post("/approve/" + id);
-  $("msg").textContent = "Signal sent: approved.";
-  poll();
-}
+$("scenarios").innerHTML = SCENARIOS.map(([v, name, hint], i) => `<label class="choice"><input type="radio" name="scenario" value="${v}"${i === 0 ? " checked" : ""}><span><b>${name}</b><small>${hint}</small></span></label>`).join("");
+$("legend").innerHTML = Object.entries(LABEL).map(([k, v]) => `<span class="pill" style="--c:var(--${TONE[k]})">${v}</span>`).join("") + '<span class="pill" style="border-style:dashed">undo</span>';
+$("addrchips").innerHTML = ["99 Long Road, Pune", "x"].map((a) => `<button class="tag" data-addr="${a}">${a === "x" ? "too short (rejected)" : a}</button>`).join("");
+$("addrchips").onclick = (e) => { const a = e.target.dataset.addr; if (a) { $("newaddr").value = a; $("newaddr").focus(); } };
+$("place").onclick = start;
+$("approve").onclick = async () => { await post("/approve/" + id); $("msg").textContent = "Signal sent: approved."; pollOrder(); };
+$("change").onclick = async () => { const r = await post("/address/" + id, { address: $("newaddr").value }); $("msg").textContent = (await r.json()).message; pollOrder(); };
+$("recent").onclick = (e) => { const b = e.target.closest(".rec"); if (b) open(b.dataset.id); };
+$("lanes").onclick = (e) => {
+  const b = e.target.closest(".chip[data-i]"); if (!b) return;
+  selected = +b.dataset.i; const s = view.steps[selected];
+  $("detail").textContent = [s.name, s.service, s.language && s.language + " worker", meta(s), s.detail, s.worker && "worker " + s.worker].filter(Boolean).join(" · ");
+  renderLanes();
+};
+$("pause").onclick = () => { paused = !paused; $("pause").setAttribute("aria-pressed", paused); $("pause").textContent = paused ? "Resume" : "Pause"; tickCountdown(); };
+$("theme").onclick = () => {
+  const next = isDark() ? "light" : "dark";
+  setTheme(next);
+  try { localStorage.setItem("theme", next); } catch (e) { /* storage may be blocked */ }
+};
+const wanted = new URLSearchParams(location.search).get("theme");   // ?theme=light or ?theme=dark
+try { setTheme(["light", "dark"].includes(wanted) ? wanted : localStorage.getItem("theme")); } catch (e) { setTheme(null); }
 
-async function changeAddress() {
-  const r = await post("/address/" + id, { address: $("newaddr").value });
-  $("msg").textContent = (await r.json()).message;
-  poll();
-}
+setInterval(() => { if (!view || view.state === "RUNNING") pollOrder(); }, 700);
+setInterval(pollSide, 3000);
+setInterval(tickCountdown, 1000);
+pollSide();
+const first = new URLSearchParams(location.search).get("order");
+if (first) open(first);
 </script>
+</body>
+</html>

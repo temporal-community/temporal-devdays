@@ -32,9 +32,9 @@ def read(events) -> tuple[list[dict], float | None]:
         if e.HasField("activity_task_scheduled_event_attributes"):
             a = e.activity_task_scheduled_event_attributes
             step = dict(kind="activity", name=a.activity_type.name, service=a.task_queue.name, status="running",
-                        attempt=1, detail="", undo=a.activity_type.name in UNDO, worker="", activity_id=a.activity_id)
+                        attempt=1, detail="", item="", undo=a.activity_type.name in UNDO, worker="", activity_id=a.activity_id)
             if len(a.input.payloads) > 1:   # ship_item(order_id, item, scenario): the item is the second argument
-                step["detail"] = a.input.payloads[1].data.decode().strip('"')
+                step["item"] = a.input.payloads[1].data.decode().strip('"')
             by_event[e.event_id] = step
             steps.append(step)
         elif e.HasField("activity_task_started_event_attributes"):
@@ -50,7 +50,7 @@ def read(events) -> tuple[list[dict], float | None]:
         elif e.HasField("child_workflow_execution_started_event_attributes"):
             a = e.child_workflow_execution_started_event_attributes
             by_event["child"] = dict(kind="child", name=a.workflow_type.name, service="orders", status="running",
-                                     attempt=1, detail=a.workflow_execution.workflow_id, undo=False, worker="")
+                                     attempt=1, detail=a.workflow_execution.workflow_id, item="", undo=False, worker="")
             steps.append(by_event["child"])
         elif e.HasField("child_workflow_execution_completed_event_attributes"):
             by_event["child"]["status"] = "done"
@@ -58,11 +58,11 @@ def read(events) -> tuple[list[dict], float | None]:
             by_event["child"].update(status="failed", detail="a child step failed for good")
         elif e.HasField("workflow_execution_signaled_event_attributes"):
             steps.append(dict(kind="signal", name=e.workflow_execution_signaled_event_attributes.signal_name,
-                              service="orders", status="done", attempt=1, detail="", undo=False, worker=""))
+                              service="orders", status="done", attempt=1, detail="", item="", undo=False, worker=""))
         elif e.HasField("workflow_execution_update_accepted_event_attributes"):
             a = e.workflow_execution_update_accepted_event_attributes
             steps.append(dict(kind="update", name=a.accepted_request.input.name,
-                              service="orders", status="done", attempt=1, detail="", undo=False, worker=""))
+                              service="orders", status="done", attempt=1, detail="", item="", undo=False, worker=""))
         elif e.HasField("timer_started_event_attributes"):
             timer = e.event_time.seconds + e.timer_started_event_attributes.start_to_fire_timeout.seconds
         elif e.HasField("timer_fired_event_attributes") or e.HasField("timer_canceled_event_attributes"):

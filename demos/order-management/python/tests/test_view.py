@@ -43,7 +43,7 @@ async def test_the_timeline_shows_the_steps_the_child_and_who_ran_them(page):
     assert names(data, kind="activity") == ["check_stock", "reserve_stock", "charge"]
     assert {s["language"] for s in data["steps"] if s["kind"] == "activity"} == {"python"}
     child = next(s for s in data["steps"] if s["kind"] == "child")
-    assert child["status"] == "done" and sorted(i["detail"] for i in child["items"]) == ["keypad", "table legs", "table top"]
+    assert child["status"] == "done" and sorted(i["item"] for i in child["items"]) == ["keypad", "table legs", "table top"]
     assert all(i["status"] == "done" and i["service"] == "shipping" for i in child["items"])
     services = await (await http.get("/services")).get_json()
     assert [(s["name"], s["up"], s["language"]) for s in services] == [
