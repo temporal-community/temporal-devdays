@@ -15,7 +15,7 @@ async def run_now(client: Client) -> str:
     # TODO 1 end
 
 
-async def run_later(client: Client):
-    # TODO 2 start: start it with client.start_activity and a start_delay of 6 hours, and return the handle
-    raise NotImplementedError("TODO 2: start it with client.start_activity and a start_delay of 6 hours, and return the handle")
+async def run_later(client: Client, delay: timedelta = timedelta(hours=6), activity_id: str = ACTIVITY_ID):
+    # TODO 2 start: start it with client.start_activity, start_delay=delay (6 hours by default), id=activity_id, and return the handle
+    raise NotImplementedError("TODO 2: start it with client.start_activity, start_delay=delay (6 hours by default), id=activity_id, and return the handle")
     # TODO 2 end

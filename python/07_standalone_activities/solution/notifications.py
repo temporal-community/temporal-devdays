@@ -21,15 +21,15 @@ async def run_now(client: Client) -> str:
     # TODO 1 end
 
 
-async def run_later(client: Client):
-    # TODO 2 start: start it with client.start_activity and a start_delay of 6 hours, and return the handle
+async def run_later(client: Client, delay: timedelta = timedelta(hours=6), activity_id: str = ACTIVITY_ID):
+    # TODO 2 start: start it with client.start_activity, start_delay=delay (6 hours by default), id=activity_id, and return the handle
     return await client.start_activity(
         send_notification,
         INPUT,
-        id=ACTIVITY_ID,
+        id=activity_id,
         task_queue=TASK_QUEUE,
         start_to_close_timeout=timedelta(seconds=30),
         schedule_to_close_timeout=timedelta(days=7),
-        start_delay=timedelta(hours=6),
+        start_delay=delay,
     )
     # TODO 2 end

@@ -13,7 +13,7 @@ The check fails until the TODOs are done.
 
 ## Tasks
 - [ ] TODO 1 (`notifications.py`): `run_now`: run `send_notification` with `client.execute_activity` and return the result
-- [ ] TODO 2 (`notifications.py`): `run_later`: start it with `client.start_activity` and a `start_delay` of 6 hours
+- [ ] TODO 2 (`notifications.py`): `run_later`: start it with `client.start_activity`, `start_delay=delay` (6 hours by default) and `id=activity_id`
 
 ## The check
 `run_now` / `runNow` runs the Activity with the right id, queue and timeout, and `run_later` / `runLater` adds a 6 hour start delay.
@@ -25,9 +25,9 @@ uv run python worker.py      # terminal 2
 uv run python run_standalone.py     # terminal 3
 ```
 
-Then: `temporal activity list` and the Standalone Activities view in the Web UI.
+You should see the first message at once, then `scheduled, runs in 10 seconds`, then the second message after 10 seconds. Then run `temporal activity list` and open the Standalone Activities view in the Web UI. Both Activities are there, with the IDs `welcome-notification-user-123` and `welcome-notification-user-123-later`.
 
 ## Stretch
-Change the message, run it again with a new id, and compare both in `temporal activity list`.
+Call the same Activity from a Workflow instead (`execute_activity` / `executeActivity` with the same Activity and no change to it). It is the same code in a bigger plan, which is how a one-step job grows. Then change the message, run it again with a new id, and compare in `temporal activity list`.
 
 Solution: [solution](../solution)

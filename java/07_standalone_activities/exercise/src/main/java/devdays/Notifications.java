@@ -17,8 +17,12 @@ public class Notifications {
     }
 
     public static ActivityHandle<String> runLater(ActivityClient client) {
-        // TODO 2 start: start it with client.start and a start delay of 6 hours, and return the handle
-        throw new UnsupportedOperationException("TODO 2: start it with client.start and a start delay of 6 hours, and return the handle");
+        return runLater(client, Duration.ofHours(6), ACTIVITY_ID);
+    }
+
+    public static ActivityHandle<String> runLater(ActivityClient client, Duration delay, String id) {
+        // TODO 2 start: start it with client.start, setStartDelay(delay) and setId(id), and return the handle
+        throw new UnsupportedOperationException("TODO 2: start it with client.start, setStartDelay(delay) and setId(id), and return the handle");
         // TODO 2 end
     }
 }

@@ -1,26 +1,45 @@
 # 07: Standalone Activities
 
 ## The problem
-You only want to send one welcome message, with retries if it fails. Writing a whole Workflow around a single step feels like too much.
+A user signs up. You want to send a welcome message now, and a reminder tomorrow. Each one is a single step: call an email service, retry if it is down, and know whether it worked. Writing a whole Workflow for one step feels like too much. Skipping Temporal means writing your own retry loop, your own "send later" job, and your own place to look when a message goes missing.
 
 ## The idea
-A **Standalone Activity** runs one Activity directly from your client, with no Workflow around it. You still get retries, timeouts and a result you can wait for, and you can start it with a **start delay** to run it later. The Activity code is the same, so if the job grows you can later call it from a Workflow with no changes.
+A **Standalone Activity** runs one Activity directly from your client, with no Workflow around it. You still get retries, timeouts, a result you can wait for, and a row in the Web UI. The Activity code is the same code you would call from a Workflow, so if the job grows later you move it into a Workflow without rewriting it.
+
+Three ways to start one:
+- **Run and wait**: `execute_activity` (Python) or `execute` (Java) starts it and returns the result.
+- **Start and come back**: `start_activity` or `start` returns a handle right away. Ask the handle for the result when you need it.
+- **Start later**: add a `start_delay`. Temporal holds the Activity and hands it to a Worker when the delay is over.
 
 ## Picture
 ```
-client ──execute_activity──▶ Temporal ──▶ Worker runs send_notification ──▶ result
-        (no Workflow in between)
+send now      client ──execute──▶ Temporal ──▶ Worker runs send_notification ──▶ result
+
+send later    client ──start, delay 6h──▶ Temporal holds it ... 6h ... ▶ Worker runs it
+              (your process can exit)                                    (you can look it up by ID)
 ```
+
+## The story in this exercise
+1. A user signs up. `run_now` sends the welcome message and waits for the result.
+2. The same call site, `run_later`, books a reminder with a delay. The client does not have to stay alive for the delay.
+3. Run `temporal activity list`. Both are there, with an ID, a status and a type.
+4. Later the reminder needs steps: check preferences, send, record. Now you write a Workflow that calls the same Activity. The Activity does not change.
 
 ## Use it when
 - A job is one step: send a message, call an API, run a script.
 - You want retries and visibility without writing orchestration.
+- One-off or occasional work: a webhook handler fires an Activity, a backfill runs a fixed task for each ID.
 
 ## Don't use it when
-- The job has several steps that depend on each other. Use a Workflow.
+- The job has several steps that depend on each other, or needs a Signal, a Query or undo steps. Use a Workflow.
+- The job repeats on a calendar. Use a [Schedule](06-schedules.md).
+- The delay is part of a longer process ("wait 3 days, then check if they logged in"). Use a Timer inside a Workflow.
 
 ## Common mistake
-Giving two Standalone Activities the same ID while the first is still running. The ID identifies the job, so pick one that matches the business item, like `welcome-notification-user-123`.
+Giving two Standalone Activities the same ID while the first is still running. The ID identifies the job, so pick one that matches the business item, like `welcome-notification-user-123`. For a second job on the same item, add a suffix, like `-reminder`.
+
+## Language note
+The Activity type name differs: Python registers `send_notification`, Java registers `SendNotification`. `temporal activity list` shows whichever Worker ran it.
 
 ## Learn more
 - [Standalone Activities](https://docs.temporal.io/standalone-activity)

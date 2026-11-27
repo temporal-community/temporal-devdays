@@ -36,3 +36,11 @@ async def test_run_later_starts_it_with_a_delay():
     assert kind == "start"
     assert kwargs["start_delay"] == timedelta(hours=6)
     assert kwargs["schedule_to_close_timeout"] == timedelta(days=7)
+
+
+async def test_run_later_uses_the_delay_and_id_it_is_given():
+    client = FakeClient()
+    await run_later(client, timedelta(seconds=10), "other-id")
+    _, _, kwargs = client.calls[0]
+    assert kwargs["start_delay"] == timedelta(seconds=10)
+    assert kwargs["id"] == "other-id"

@@ -44,4 +44,11 @@ class NotificationsTest {
         assertEquals(Duration.ofHours(6), options.getStartDelay());
         assertEquals(Duration.ofDays(7), options.getScheduleToCloseTimeout());
     }
+
+    @Test
+    void runLaterUsesTheDelayAndIdItIsGiven() {
+        Notifications.runLater(fakeClient(), Duration.ofSeconds(10), "other-id");
+        assertEquals(Duration.ofSeconds(10), options.getStartDelay());
+        assertEquals("other-id", options.getId());
+    }
 }

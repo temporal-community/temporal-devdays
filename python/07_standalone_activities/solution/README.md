@@ -21,4 +21,4 @@ Start the dev server first: `temporal server start-dev` (Web UI at http://localh
 uv run python worker.py      # terminal 2
 uv run python run_standalone.py      # terminal 3
 ```
-You should see `sent 'Welcome!' to user-123`.
+You should see `sent 'Welcome!' to user-123`, then `scheduled, runs in 10 seconds`, then the same message again 10 seconds later (a delayed Activity). Then run `temporal activity list`: both are there, with the IDs `welcome-notification-user-123` and `welcome-notification-user-123-later`.
