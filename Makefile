@@ -1,4 +1,4 @@
-.PHONY: setup check check-live check-links
+.PHONY: setup check check-live check-links check-todos
 
 setup:
 	cd python && uv sync
@@ -11,3 +11,6 @@ check-live:
 
 check-links:
 	python3 scripts/check_links.py
+
+check-todos:
+	python3 scripts/behaviour.py --per-todo

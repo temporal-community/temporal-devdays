@@ -1,4 +1,5 @@
 """Behaviour checks: solutions pass, exercises fail on a TODO, overlay passes.
+With --per-todo also checks that every TODO has its own test.
 With --live also runs the Worker and starter of each solution (needs the dev server).
 Standard library only. Exit code 1 if any row fails."""
 import json
@@ -78,6 +79,62 @@ def behaviour() -> None:
             record(f"{lang}/{topic}: overlay passes", code == 0, "" if code == 0 else last_line(out))
 
 
+REGION = re.compile(r"^\s*(#|//) TODO (\d+) (start|end)\b")
+
+
+def regions(text: str) -> dict[str, list[str]]:
+    """TODO number -> the lines from its start marker to its end marker, markers included."""
+    out, current = {}, None
+    for line in text.split("\n"):
+        m = REGION.match(line)
+        if m and m.group(3) == "start":
+            current = m.group(2)
+            out[current] = []
+        if current is not None:
+            out[current].append(line)
+        if m and m.group(3) == "end":
+            current = None
+    return out
+
+
+def solve_all_but(ex_text: str, so_text: str, keep: str) -> str:
+    """The exercise file with every TODO region replaced by the solution's, except TODO `keep`."""
+    sol = regions(so_text)
+    out, skipping = [], False
+    for line in ex_text.split("\n"):
+        m = REGION.match(line)
+        if m and m.group(3) == "start" and m.group(2) in sol and m.group(2) != keep:
+            out += sol[m.group(2)]
+            skipping = True
+        if not skipping:
+            out.append(line)
+        if m and m.group(3) == "end":
+            skipping = False
+    return "\n".join(out)
+
+
+def per_todo() -> None:
+    """Each TODO must have its own test: solve all the others and the check still fails on this one."""
+    for lang in LANGS:
+        for topic, ex, so in pairs(lang):
+            suffix = ".py" if lang == "python" else ".java"
+            files = [f for f in ex.rglob(f"*{suffix}") if "TODO" in f.read_text() and not (set(f.relative_to(ex).parts) & {".venv", "target", "__pycache__"})]
+            numbers = sorted({n for f in files for n in regions(f.read_text())})
+            if len(numbers) < 2:
+                continue
+            for k in numbers:
+                with tempfile.TemporaryDirectory() as tmp:
+                    work = Path(tmp) / ex.name
+                    shutil.copytree(ex, work, ignore=ignore)
+                    for f in files:
+                        rel = f.relative_to(ex)
+                        (work / rel).write_text(solve_all_but(f.read_text(), (so / rel).read_text(), k))
+                    code, out = run(lang, work)
+                ok = code != 0 and f"TODO {k}" in out
+                record(f"{lang}/{topic}: TODO {k} alone is tested", ok,
+                       "" if ok else ("passes without TODO %s" % k if code == 0 else "fails, but not naming TODO %s: %s" % (k, last_line(out))))
+
+
 def live() -> None:
     table = json.loads((ROOT / "scripts" / "live.json").read_text())
     for item in table:
@@ -108,6 +165,8 @@ def live() -> None:
 
 def main() -> int:
     behaviour()
+    if "--per-todo" in sys.argv:
+        per_todo()
     if "--live" in sys.argv:
         live()
     width = max((len(r[0]) for r in rows), default=10)
